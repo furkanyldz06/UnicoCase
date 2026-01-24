@@ -96,73 +96,66 @@ namespace BoardDefence.Defence
             }
         }
 
-		private GameObject FindNearestEnemy()
-		{
-		    GameObject nearest = null;
-		    float nearestDist = float.MaxValue;
-		
-		    var enemies = GameObject.FindGameObjectsWithTag("Enemy");
-		
-			GameBoard board = null;
-			if (_forwardOnly)
+			private GameObject FindNearestEnemy()
 			{
-			    board = GameObject.FindObjectOfType<GameBoard>();
+			    GameObject nearest = null;
+			    float nearestDist = float.MaxValue;
+			
+			    var enemies = GameObject.FindGameObjectsWithTag("Enemy");
+			
+				    foreach (var enemy in enemies)
+				    {
+				        var damageable = enemy.GetComponent<IDamageable>();
+				        if (damageable == null || damageable.IsDead)
+				            continue;
+				
+					// Forward turret'ler için: sadece SimpleEnemyMover kullanan
+					// grid tabanlı düşmanları ve SADECE aynı kolon + yukarıyı düşün.
+					var mover = enemy.GetComponent<SimpleEnemyMover>();
+					Vector2Int enemyGrid = mover != null ? mover.CurrentGridPos : new Vector2Int(-1, -1);
+				
+				        // Mesafe hesabı – forward turret'ler için kolonu world X'ten kilitle,
+				        // diğerleri için klasik world mesafesi kullan.
+				        float dist;
+				
+					if (_forwardOnly)
+					{
+					    if (mover == null)
+					        continue; // grid bilgisiz düşmanı tamamen yok say
+					
+					    // 1) GRID'e göre aynı kolon mu?
+					    //    Aynı kolonda değilse forward turret ASLA ateş etmesin.
+					    if (enemyGrid.x != _gridPosition.x)
+					        continue;
+					
+					    // 2) Sadece yukarıda (ileri yönde) olanlar
+					    if (enemyGrid.y >= _gridPosition.y)
+					        continue;
+					
+					    // 3) Menzil: kaç satır yukarıda?
+					    int rowDelta = _gridPosition.y - enemyGrid.y; // 1,2,3,...
+					    if (rowDelta > _range)
+					        continue; // menzil dışında
+					
+					    dist = rowDelta; // forward için "mesafe" = grid satır farkı
+					}
+				        else
+				        {
+				            // All-direction turret'ler için klasik world mesafesi ve yarıçap
+				            dist = (enemy.transform.position - transform.position).magnitude;
+				            if (dist > _range + 0.5f)
+				                continue;
+				        }
+				
+					if (dist < nearestDist)
+					{
+					    nearest = enemy;
+					    nearestDist = dist;
+					}
+				    }
+			
+			    return nearest;
 			}
-		
-		    foreach (var enemy in enemies)
-		    {
-		        var damageable = enemy.GetComponent<IDamageable>();
-		        if (damageable == null || damageable.IsDead)
-		            continue;
-		
-		        Vector3 enemyPos = enemy.transform.position;
-		        Vector3 delta = enemyPos - transform.position;
-		        float dist = delta.magnitude;
-		
-		        if (dist > _range + 0.5f)
-		            continue;
-		
-			        if (_forwardOnly)
-			        {
-			            bool sameColumn;
-			            bool isAbove;
-			
-			            // Önce SimpleEnemyMover üzerinden grid pozisyonunu dene
-			            var mover = enemy.GetComponent<SimpleEnemyMover>();
-			            if (mover != null)
-			            {
-			                Vector2Int enemyGrid = mover.CurrentGridPos;
-			                sameColumn = enemyGrid.x == _gridPosition.x;
-			                isAbove = enemyGrid.y < _gridPosition.y;
-			            }
-			            else if (board != null)
-			            {
-			                // Fallback: board'dan world->grid çevir
-			                Vector2Int enemyGrid = board.WorldToGridPosition(enemyPos);
-			                sameColumn = enemyGrid.x == _gridPosition.x;
-			                isAbove = enemyGrid.y < _gridPosition.y;
-			            }
-			            else
-			            {
-			                // Son çare: dünya koordinatı ile kabaca kontrol
-			                float absX = Mathf.Abs(delta.x);
-			                sameColumn = absX < 0.3f;
-			                isAbove = delta.y > 0.1f;
-			            }
-			
-			            if (!sameColumn || !isAbove)
-			                continue;
-			        }
-		
-		        if (dist < nearestDist)
-		        {
-		            nearest = enemy;
-		            nearestDist = dist;
-		        }
-		    }
-		
-		    return nearest;
-		}
 
         private void ShootAt(GameObject target)
         {

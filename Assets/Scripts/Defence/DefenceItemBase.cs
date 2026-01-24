@@ -5,6 +5,7 @@ using BoardDefence.Core.Events;
 using BoardDefence.Data;
 using BoardDefence.Defence.AttackStrategies;
 using BoardDefence.Interfaces;
+using BoardDefence.Enemy;
 using UnityEngine;
 
 namespace BoardDefence.Defence
@@ -140,52 +141,90 @@ namespace BoardDefence.Defence
         /// </summary>
         protected virtual GameObject FindEnemyInDirection(Vector2Int targetPos)
         {
-			Vector3 worldPos = GetWorldPosition(targetPos);
-			
-			// Search for enemies near this board cell first
-			Collider[] colliders = Physics.OverlapSphere(worldPos, 0.5f);
-			foreach (var col in colliders)
-			{
-				if (col.GetComponent<IDamageable>() != null)
+				Vector3 worldPos = GetWorldPosition(targetPos);
+				
+				// Search for enemies near this board cell first
+				Collider[] colliders = Physics.OverlapSphere(worldPos, 0.5f);
+				foreach (var col in colliders)
 				{
-					return col.gameObject;
+					var damageable = col.GetComponent<IDamageable>();
+					if (damageable != null)
+					{
+						var candidate = col.gameObject;
+						if (!IsValidColumnForThisDefence(candidate))
+							continue;
+						return candidate;
+					}
 				}
-			}
-			
-			// Also check 2D colliders
-			Collider2D[] colliders2D = Physics2D.OverlapCircleAll(worldPos, 0.5f);
-			foreach (var col in colliders2D)
-			{
-				if (col.GetComponent<IDamageable>() != null)
+				
+				// Also check 2D colliders
+				Collider2D[] colliders2D = Physics2D.OverlapCircleAll(worldPos, 0.5f);
+				foreach (var col in colliders2D)
 				{
-					return col.gameObject;
+					var damageable = col.GetComponent<IDamageable>();
+					if (damageable != null)
+					{
+						var candidate = col.gameObject;
+						if (!IsValidColumnForThisDefence(candidate))
+							continue;
+						return candidate;
+					}
 				}
-			}
-			
-			// Fallback: search all enemies but STILL respect direction (target cell)
-			var enemies = GameObject.FindGameObjectsWithTag("Enemy");
-			if (enemies.Length == 0)
-			{
-				// Fallback: find by name
-				enemies = FindEnemiesByName();
-			}
-			
-			GameObject closest = null;
-			float closestDist = float.MaxValue;
-			const float cellTolerance = 0.75f; // how close to the target cell the enemy must be
-			
-			foreach (var enemy in enemies)
-			{
-				float distanceToCell = Vector3.Distance(worldPos, enemy.transform.position);
-				if (distanceToCell <= cellTolerance && distanceToCell < closestDist)
+				
+				// Fallback: search all enemies but STILL respect direction (target cell)
+				var enemies = GameObject.FindGameObjectsWithTag("Enemy");
+				if (enemies.Length == 0)
 				{
-					closest = enemy;
-					closestDist = distanceToCell;
+					// Fallback: find by name
+					enemies = FindEnemiesByName();
 				}
-			}
-			
-			return closest;
+				
+				GameObject closest = null;
+				float closestDist = float.MaxValue;
+				const float cellTolerance = 0.75f; // how close to the target cell the enemy must be
+				
+				foreach (var enemy in enemies)
+				{
+					float distanceToCell = Vector3.Distance(worldPos, enemy.transform.position);
+					if (distanceToCell <= cellTolerance && distanceToCell < closestDist)
+					{
+						if (!IsValidColumnForThisDefence(enemy))
+							continue;
+						closest = enemy;
+						closestDist = distanceToCell;
+					}
+				}
+				
+				return closest;
         }
+
+	        /// <summary>
+	        /// Forward (sadece ileri) savunmalar için: hedefin gerçekten aynı kolonda
+	        /// olup olmadığını kontrol eder. Diğer yönlerde ateş edenler için kısıtlama yok.
+	        /// </summary>
+	        private bool IsValidColumnForThisDefence(GameObject enemy)
+	        {
+	            // Sadece Forward atak yönü olan item'lar için kolon kilidi uygula
+	            if (_data != null && _data.AttackDirection == AttackDirection.Forward)
+	            {
+	                // Önce grid tabanlı kontrol (SimpleEnemyMover varsa)
+	                var mover = enemy.GetComponent<SimpleEnemyMover>();
+	                if (mover != null)
+	                {
+	                    if (mover.CurrentGridPos.x != _gridPosition.x)
+	                        return false;
+	                }
+	                else
+	                {
+	                    // Yedek olarak world X'e bak
+	                    float dx = Mathf.Abs(enemy.transform.position.x - transform.position.x);
+	                    if (dx > 0.05f)
+	                        return false;
+	                }
+	            }
+	
+	            return true;
+	        }
 
         private GameObject[] FindEnemiesByName()
         {
