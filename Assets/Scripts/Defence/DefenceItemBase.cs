@@ -56,6 +56,15 @@ namespace BoardDefence.Defence
                 _spriteRenderer.sprite = data.Sprite;
                 _spriteRenderer.color = data.TintColor;
             }
+
+	            // Oyun iinde menzil g3sterimi (her savunma iin)
+	            var rangeViz = GetComponent<AttackRangeVisualizer>();
+	            if (rangeViz == null)
+	            {
+	                rangeViz = gameObject.AddComponent<AttackRangeVisualizer>();
+	            }
+	            int rangeCells = _data != null ? _data.Range : 1;
+	            rangeViz.Initialize(rangeCells);
         }
 
         public void Place(Vector2Int position)

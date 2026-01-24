@@ -52,7 +52,15 @@ namespace BoardDefence.Defence
 	                    _forwardOnly = false; // her yön
 	                    break;
 	            }
-	
+
+	            // Menzil çemberini oyun içinde göster
+	            var rangeViz = GetComponent<AttackRangeVisualizer>();
+	            if (rangeViz == null)
+	            {
+	                rangeViz = gameObject.AddComponent<AttackRangeVisualizer>();
+	            }
+	            rangeViz.Initialize(_range);
+
 	            // Otomatik saldırıya başla
 	            StartAttacking();
 	        }
