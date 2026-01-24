@@ -17,7 +17,7 @@ MonoBehaviour:
   _description: 
   _damage: 5
   _range: 2
-  _attackInterval: 4
+  _attackInterval: 2
   _attackDirection: 0
   _sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
   _tintColor: {r: 0, g: 1, b: 0, a: 1}

@@ -140,46 +140,51 @@ namespace BoardDefence.Defence
         /// </summary>
         protected virtual GameObject FindEnemyInDirection(Vector2Int targetPos)
         {
-            Vector3 worldPos = GetWorldPosition(targetPos);
-
-            // Search for enemies near this position
-            Collider[] colliders = Physics.OverlapSphere(worldPos, 0.5f);
-            foreach (var col in colliders)
-            {
-                if (col.GetComponent<IDamageable>() != null)
-                {
-                    return col.gameObject;
-                }
-            }
-
-            // Also check 2D colliders
-            Collider2D[] colliders2D = Physics2D.OverlapCircleAll(worldPos, 0.5f);
-            foreach (var col in colliders2D)
-            {
-                if (col.GetComponent<IDamageable>() != null)
-                {
-                    return col.gameObject;
-                }
-            }
-
-            // Search all enemies by tag or name
-            var enemies = GameObject.FindGameObjectsWithTag("Enemy");
-            if (enemies.Length == 0)
-            {
-                // Fallback: find by name
-                enemies = FindEnemiesByName();
-            }
-
-            foreach (var enemy in enemies)
-            {
-                float distance = Vector3.Distance(transform.position, enemy.transform.position);
-                if (distance <= Range + 0.5f)
-                {
-                    return enemy;
-                }
-            }
-
-            return null;
+			Vector3 worldPos = GetWorldPosition(targetPos);
+			
+			// Search for enemies near this board cell first
+			Collider[] colliders = Physics.OverlapSphere(worldPos, 0.5f);
+			foreach (var col in colliders)
+			{
+				if (col.GetComponent<IDamageable>() != null)
+				{
+					return col.gameObject;
+				}
+			}
+			
+			// Also check 2D colliders
+			Collider2D[] colliders2D = Physics2D.OverlapCircleAll(worldPos, 0.5f);
+			foreach (var col in colliders2D)
+			{
+				if (col.GetComponent<IDamageable>() != null)
+				{
+					return col.gameObject;
+				}
+			}
+			
+			// Fallback: search all enemies but STILL respect direction (target cell)
+			var enemies = GameObject.FindGameObjectsWithTag("Enemy");
+			if (enemies.Length == 0)
+			{
+				// Fallback: find by name
+				enemies = FindEnemiesByName();
+			}
+			
+			GameObject closest = null;
+			float closestDist = float.MaxValue;
+			const float cellTolerance = 0.75f; // how close to the target cell the enemy must be
+			
+			foreach (var enemy in enemies)
+			{
+				float distanceToCell = Vector3.Distance(worldPos, enemy.transform.position);
+				if (distanceToCell <= cellTolerance && distanceToCell < closestDist)
+				{
+					closest = enemy;
+					closestDist = distanceToCell;
+				}
+			}
+			
+			return closest;
         }
 
         private GameObject[] FindEnemiesByName()
