@@ -126,6 +126,14 @@ namespace BoardDefence.Core
         /// </summary>
         private IEnumerator SpawnRoutine()
         {
+            // Null kontrolü
+            if (_currentLevelData == null)
+            {
+                Debug.LogWarning("No level data set! Using default spawn values.");
+                yield return StartCoroutine(DefaultSpawnRoutine());
+                yield break;
+            }
+
             yield return new WaitForSeconds(_currentLevelData.InitialSpawnDelay);
 
             foreach (var spawnData in _currentLevelData.EnemySpawns)
@@ -142,18 +150,96 @@ namespace BoardDefence.Core
         }
 
         /// <summary>
+        /// Default spawn routine when no level data is available
+        /// Düşmanlar sürekli olarak spawn olur (endless mode)
+        /// </summary>
+        private IEnumerator DefaultSpawnRoutine()
+        {
+            yield return new WaitForSeconds(1f);
+
+            // Sürekli düşman spawn et - oyun bitene kadar
+            while (_isSpawning)
+            {
+                SpawnEnemy(GetRandomEnemyType());
+
+                // Rastgele spawn aralığı (1-3 saniye)
+                float spawnInterval = Random.Range(1f, 3f);
+                yield return new WaitForSeconds(spawnInterval);
+            }
+        }
+
+        /// <summary>
+        /// Rastgele düşman tipi seç
+        /// </summary>
+        private EnemyType GetRandomEnemyType()
+        {
+            int random = Random.Range(0, 3);
+            return random switch
+            {
+                0 => EnemyType.Type1,
+                1 => EnemyType.Type2,
+                2 => EnemyType.Type3,
+                _ => EnemyType.Type1
+            };
+        }
+
+        /// <summary>
         /// Spawn a single enemy
         /// </summary>
         private void SpawnEnemy(EnemyType type)
         {
+            // Null kontrolleri
+            if (_enemyPool == null)
+            {
+                Debug.LogWarning("EnemyPool is null! Cannot spawn enemy.");
+                SpawnTestEnemy();
+                return;
+            }
+
+            if (_gameBoard == null)
+            {
+                Debug.LogError("GameBoard is null! Cannot spawn enemy.");
+                return;
+            }
+
             var enemy = _enemyPool.Get(type);
-            if (enemy == null) return;
+            if (enemy == null)
+            {
+                Debug.LogWarning($"Could not get enemy of type {type} from pool.");
+                SpawnTestEnemy();
+                return;
+            }
 
             // Random column for spawn
             int column = Random.Range(0, _gameBoard.Width);
             var spawnPosition = new Vector2Int(column, 0);
-            
+
             enemy.StartMoving(spawnPosition, _gameBoard.GridToWorldPosition);
+        }
+
+        /// <summary>
+        /// Spawn test enemy when pool is not available
+        /// </summary>
+        private void SpawnTestEnemy()
+        {
+            if (_gameBoard == null) return;
+
+            int column = Random.Range(0, _gameBoard.Width);
+            Vector2Int spawnPos = new Vector2Int(column, 0);
+            Vector3 worldPos = _gameBoard.GridToWorldPosition(spawnPos);
+
+            // Basit düşman oluştur
+            var enemy = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            enemy.name = $"TestEnemy_{_defeatedEnemies + _escapedEnemies}";
+            enemy.transform.position = worldPos;
+            enemy.transform.localScale = Vector3.one * 0.6f;
+            enemy.GetComponent<Renderer>().material.color = Color.red;
+
+            // Hareket scripti ekle
+            var mover = enemy.AddComponent<BoardDefence.Enemy.SimpleEnemyMover>();
+            mover.Initialize(_gameBoard, spawnPos);
+
+            Debug.Log($"Spawned test enemy at column {column}");
         }
 
         private void HandleEnemyDied(Vector2Int position)

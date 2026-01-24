@@ -122,33 +122,120 @@ namespace BoardDefence.Defence
         protected virtual void PerformAttack()
         {
             var targetPositions = _attackStrategy.GetTargetPositions(_gridPosition, Range);
-            
+
+            // Find enemies in range and shoot at them
             foreach (var pos in targetPositions)
             {
-                // Check for enemies at this position and damage them
-                TryDamageEnemyAt(pos);
+                var enemy = FindEnemyInDirection(pos);
+                if (enemy != null)
+                {
+                    ShootProjectileAt(enemy);
+                    break; // Only shoot one projectile per attack
+                }
             }
-            
-            GameEvents.RaiseDefenceItemAttacked(_gridPosition, Damage);
         }
 
         /// <summary>
-        /// Try to damage an enemy at the specified position
+        /// Find enemy in the given direction
         /// </summary>
-        protected virtual void TryDamageEnemyAt(Vector2Int position)
+        protected virtual GameObject FindEnemyInDirection(Vector2Int targetPos)
         {
-            // This will be implemented to interact with the enemy system
-            var colliders = Physics2D.OverlapPointAll(GetWorldPosition(position));
-            
-            foreach (var collider in colliders)
+            Vector3 worldPos = GetWorldPosition(targetPos);
+
+            // Search for enemies near this position
+            Collider[] colliders = Physics.OverlapSphere(worldPos, 0.5f);
+            foreach (var col in colliders)
             {
-                var damageable = collider.GetComponent<IDamageable>();
-                if (damageable != null && !damageable.IsDead)
+                if (col.GetComponent<IDamageable>() != null)
                 {
-                    damageable.TakeDamage(Damage);
-                    break; // Only damage one enemy per position
+                    return col.gameObject;
                 }
             }
+
+            // Also check 2D colliders
+            Collider2D[] colliders2D = Physics2D.OverlapCircleAll(worldPos, 0.5f);
+            foreach (var col in colliders2D)
+            {
+                if (col.GetComponent<IDamageable>() != null)
+                {
+                    return col.gameObject;
+                }
+            }
+
+            // Search all enemies by tag or name
+            var enemies = GameObject.FindGameObjectsWithTag("Enemy");
+            if (enemies.Length == 0)
+            {
+                // Fallback: find by name
+                enemies = FindEnemiesByName();
+            }
+
+            foreach (var enemy in enemies)
+            {
+                float distance = Vector3.Distance(transform.position, enemy.transform.position);
+                if (distance <= Range + 0.5f)
+                {
+                    return enemy;
+                }
+            }
+
+            return null;
+        }
+
+        private GameObject[] FindEnemiesByName()
+        {
+            var allObjects = FindObjectsByType<Transform>(FindObjectsSortMode.None);
+            var enemies = new List<GameObject>();
+
+            foreach (var obj in allObjects)
+            {
+                if (obj.name.Contains("Enemy") || obj.name.Contains("enemy"))
+                {
+                    enemies.Add(obj.gameObject);
+                }
+            }
+
+            return enemies.ToArray();
+        }
+
+        /// <summary>
+        /// Shoot a visual projectile at the target
+        /// </summary>
+        protected virtual void ShootProjectileAt(GameObject target)
+        {
+            if (target == null) return;
+
+            // Create visual projectile
+            var projectile = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            projectile.name = "Bullet";
+            projectile.transform.position = transform.position;
+            projectile.transform.localScale = Vector3.one * 0.2f;
+
+            // Set color based on defence type
+            var renderer = projectile.GetComponent<Renderer>();
+            renderer.material.color = GetProjectileColor();
+
+            // Remove default collider and add trigger
+            Destroy(projectile.GetComponent<Collider>());
+
+            // Add bullet mover component
+            var mover = projectile.AddComponent<BulletMover>();
+            mover.Initialize(target, Damage, 8f);
+
+            GameEvents.RaiseDefenceItemAttacked(_gridPosition, Damage);
+        }
+
+        private Color GetProjectileColor()
+        {
+            if (_data == null) return Color.yellow;
+
+            return _data.ItemType switch
+            {
+                DefenceItemType.Type1 => Color.cyan,
+                DefenceItemType.Type2 => Color.green,
+                DefenceItemType.Type3 => Color.magenta,
+                _ => Color.yellow
+            };
         }
 
         /// <summary>
@@ -158,6 +245,82 @@ namespace BoardDefence.Defence
         {
             // Simple conversion - actual implementation should reference GameBoard
             return new Vector3(gridPos.x - 1.5f, -(gridPos.y - 3.5f), 0);
+        }
+    }
+
+    /// <summary>
+    /// Simple bullet mover component
+    /// </summary>
+    public class BulletMover : MonoBehaviour
+    {
+        private GameObject _target;
+        private int _damage;
+        private float _speed;
+        private Vector3 _lastTargetPos;
+        private float _lifetime = 3f;
+
+        public void Initialize(GameObject target, int damage, float speed)
+        {
+            _target = target;
+            _damage = damage;
+            _speed = speed;
+            _lastTargetPos = target != null ? target.transform.position : transform.position + Vector3.up;
+        }
+
+        private void Update()
+        {
+            _lifetime -= Time.deltaTime;
+            if (_lifetime <= 0)
+            {
+                Destroy(gameObject);
+                return;
+            }
+
+            // Update target position if target still exists
+            if (_target != null)
+            {
+                _lastTargetPos = _target.transform.position;
+            }
+
+            // Move towards target
+            Vector3 direction = (_lastTargetPos - transform.position).normalized;
+            transform.position += direction * _speed * Time.deltaTime;
+
+            // Check if reached target
+            if (Vector3.Distance(transform.position, _lastTargetPos) < 0.2f)
+            {
+                HitTarget();
+            }
+        }
+
+        private void HitTarget()
+        {
+            if (_target != null)
+            {
+                var damageable = _target.GetComponent<IDamageable>();
+                if (damageable != null && !damageable.IsDead)
+                {
+                    damageable.TakeDamage(_damage);
+                    Debug.Log($"Bullet hit! Dealt {_damage} damage");
+
+                    // Visual hit effect
+                    CreateHitEffect();
+                }
+            }
+
+            Destroy(gameObject);
+        }
+
+        private void CreateHitEffect()
+        {
+            // Simple hit effect - flash
+            var effect = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            effect.name = "HitEffect";
+            effect.transform.position = transform.position;
+            effect.transform.localScale = Vector3.one * 0.4f;
+            effect.GetComponent<Renderer>().material.color = Color.white;
+            Destroy(effect.GetComponent<Collider>());
+            Destroy(effect, 0.15f);
         }
     }
 }
