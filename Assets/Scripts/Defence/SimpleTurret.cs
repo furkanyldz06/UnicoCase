@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using BoardDefence.Core.Enums;
 using BoardDefence.Interfaces;
+using BoardDefence.Board;
+using BoardDefence.Enemy;
 using UnityEngine;
 
 namespace BoardDefence.Defence
@@ -94,46 +96,73 @@ namespace BoardDefence.Defence
             }
         }
 
-	        private GameObject FindNearestEnemy()
-	        {
-	            GameObject nearest = null;
-	            float nearestDist = float.MaxValue;
-	            
-	            // Sahnedeki tüm objeler içinde "Enemy" isimli olanları tara
-	            var allObjects = FindObjectsByType<Transform>(FindObjectsSortMode.None);
-	
-	            foreach (var obj in allObjects)
-	            {
-	                if (!obj.name.Contains("Enemy") && !obj.name.Contains("enemy"))
-	                    continue;
-	
-	                Vector3 delta = obj.position - transform.position;
-	                float dist = delta.magnitude;
-	
-	                // Menzil kontrolü
-	                if (dist > _range + 0.5f)
-	                    continue;
-	
-	                // Yön kontrolü (Type1 ve Type2 için sadece ileri/yukarı)
-	                if (_forwardOnly)
-	                {
-	                    float absX = Mathf.Abs(delta.x);
-	                    bool sameColumn = absX < 0.6f;   // aynı kolon
-	                    bool isAbove = delta.y > 0.1f;   // bizden yukarıda
-	
-	                    if (!sameColumn || !isAbove)
-	                        continue;
-	                }
-	
-	                if (dist < nearestDist)
-	                {
-	                    nearest = obj.gameObject;
-	                    nearestDist = dist;
-	                }
-	            }
-	            
-	            return nearest;
-	        }
+		private GameObject FindNearestEnemy()
+		{
+		    GameObject nearest = null;
+		    float nearestDist = float.MaxValue;
+		
+		    var enemies = GameObject.FindGameObjectsWithTag("Enemy");
+		
+			GameBoard board = null;
+			if (_forwardOnly)
+			{
+			    board = GameObject.FindObjectOfType<GameBoard>();
+			}
+		
+		    foreach (var enemy in enemies)
+		    {
+		        var damageable = enemy.GetComponent<IDamageable>();
+		        if (damageable == null || damageable.IsDead)
+		            continue;
+		
+		        Vector3 enemyPos = enemy.transform.position;
+		        Vector3 delta = enemyPos - transform.position;
+		        float dist = delta.magnitude;
+		
+		        if (dist > _range + 0.5f)
+		            continue;
+		
+			        if (_forwardOnly)
+			        {
+			            bool sameColumn;
+			            bool isAbove;
+			
+			            // Önce SimpleEnemyMover üzerinden grid pozisyonunu dene
+			            var mover = enemy.GetComponent<SimpleEnemyMover>();
+			            if (mover != null)
+			            {
+			                Vector2Int enemyGrid = mover.CurrentGridPos;
+			                sameColumn = enemyGrid.x == _gridPosition.x;
+			                isAbove = enemyGrid.y < _gridPosition.y;
+			            }
+			            else if (board != null)
+			            {
+			                // Fallback: board'dan world->grid çevir
+			                Vector2Int enemyGrid = board.WorldToGridPosition(enemyPos);
+			                sameColumn = enemyGrid.x == _gridPosition.x;
+			                isAbove = enemyGrid.y < _gridPosition.y;
+			            }
+			            else
+			            {
+			                // Son çare: dünya koordinatı ile kabaca kontrol
+			                float absX = Mathf.Abs(delta.x);
+			                sameColumn = absX < 0.3f;
+			                isAbove = delta.y > 0.1f;
+			            }
+			
+			            if (!sameColumn || !isAbove)
+			                continue;
+			        }
+		
+		        if (dist < nearestDist)
+		        {
+		            nearest = enemy;
+		            nearestDist = dist;
+		        }
+		    }
+		
+		    return nearest;
+		}
 
         private void ShootAt(GameObject target)
         {

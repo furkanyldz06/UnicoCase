@@ -18,14 +18,17 @@ namespace BoardDefence.Enemy
         private Vector2Int _currentGridPos;
         private Vector3 _targetWorldPos;
         private int _currentHealth;
-        private bool _isMoving = true;
-        private bool _isDead = false;
+	        private bool _isMoving = true;
+	        private bool _isDead = false;
 
-        #region IDamageable
-        public int CurrentHealth => _currentHealth;
-        public int MaxHealth => _maxHealth;
-        public bool IsDead => _isDead;
-        #endregion
+	        // Grid konumu (kolon/satır) - savunmalar için okunabilir yapsın
+	        public Vector2Int CurrentGridPos => _currentGridPos;
+
+	        #region IDamageable
+	        public int CurrentHealth => _currentHealth;
+	        public int MaxHealth => _maxHealth;
+	        public bool IsDead => _isDead;
+	        #endregion
 
         public void Initialize(GameBoard board, Vector2Int startPos)
         {

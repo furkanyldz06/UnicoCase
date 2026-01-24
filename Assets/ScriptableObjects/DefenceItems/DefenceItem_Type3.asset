@@ -16,7 +16,7 @@ MonoBehaviour:
   _itemName: Omni Turret
   _description: 
   _damage: 10
-  _range: 1
+  _range: 2
   _attackInterval: 3
   _attackDirection: 1
   _sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
