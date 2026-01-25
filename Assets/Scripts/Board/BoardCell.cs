@@ -14,6 +14,9 @@ namespace BoardDefence.Board
         [SerializeField] private Color _validPlacementColor = Color.green;
         [SerializeField] private Color _invalidPlacementColor = Color.red;
         [SerializeField] private Color _occupiedColor = Color.gray;
+	        
+	        [Header("Placement Zone Visuals")]
+	        [SerializeField, Range(0f, 1f)] private float _nonPlaceableOpacity = 0.4f;
         
         private Vector2Int _gridPosition;
         private bool _isPlaceableZone;
@@ -111,6 +114,14 @@ namespace BoardDefence.Board
             {
                 _spriteRenderer.color = _normalColor;
             }
+	            
+	            // Savunmac1n koyulamayaca0 b1lgeler i6in opacity d161r
+	            if (!_isPlaceableZone)
+	            {
+	                var c = _spriteRenderer.color;
+	                c.a = _nonPlaceableOpacity;
+	                _spriteRenderer.color = c;
+	            }
         }
 
         private void OnMouseEnter()
