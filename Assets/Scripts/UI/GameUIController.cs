@@ -19,6 +19,7 @@ namespace BoardDefence.UI
         [SerializeField] private GameObject _pausePanel;
         [SerializeField] private GameObject _victoryPanel;
         [SerializeField] private GameObject _defeatPanel;
+	        [SerializeField] private GameObject _levelCompletedPanel;
 
         [Header("Game Info")]
         [SerializeField] private TextMeshProUGUI _livesText;
@@ -59,6 +60,7 @@ namespace BoardDefence.UI
             GameEvents.OnDefenceItemRemoved += HandleDefenceItemRemoved;
             GameEvents.OnEnemyDied += HandleEnemyDied;
             GameEvents.OnEnemyReachedBase += HandleEnemyReachedBase;
+	            GameEvents.OnLevelCompleted += HandleLevelCompleted;
         }
 
         private void UnsubscribeFromEvents()
@@ -68,6 +70,7 @@ namespace BoardDefence.UI
             GameEvents.OnDefenceItemRemoved -= HandleDefenceItemRemoved;
             GameEvents.OnEnemyDied -= HandleEnemyDied;
             GameEvents.OnEnemyReachedBase -= HandleEnemyReachedBase;
+	            GameEvents.OnLevelCompleted -= HandleLevelCompleted;
         }
 
         private void SetupButtons()
@@ -119,6 +122,7 @@ namespace BoardDefence.UI
             _pausePanel?.SetActive(false);
             _victoryPanel?.SetActive(false);
             _defeatPanel?.SetActive(false);
+	            _levelCompletedPanel?.SetActive(false);
         }
 
         private void UpdateUI()
@@ -158,8 +162,40 @@ namespace BoardDefence.UI
 
         private void HandleDefenceItemPlaced(Vector2Int pos, DefenceItemType type) => UpdateItemCounts();
         private void HandleDefenceItemRemoved(Vector2Int pos) => UpdateItemCounts();
-        private void HandleEnemyDied(Vector2Int pos) => UpdateUI();
-        private void HandleEnemyReachedBase() => UpdateUI();
+	        private void HandleEnemyDied(Vector2Int pos) => UpdateUI();
+	        private void HandleEnemyReachedBase() => UpdateUI();
+	        
+	        private void HandleLevelCompleted(int level)
+	        {
+	            Debug.Log($"[GameUI] HandleLevelCompleted called for level {level}");
+	            
+	            var gm = GameManager.Instance;
+	            var levelManager = gm?.LevelManager;
+	
+	            // Eger bu olay son level iin geldiyse, ayrca "Level Completed"
+	            // paneli gstermeyelim; zaten GameState.Victory ile Victory paneli alacak.
+	            if (levelManager != null)
+	            {
+	                int totalLevels = levelManager.TotalLevels;
+	                Debug.Log($"[GameUI] TotalLevels={totalLevels}");
+	                
+	                if (totalLevels > 0 && level >= totalLevels)
+	                {
+	                    Debug.Log("[GameUI] Last level completed, skipping LevelCompleted panel (Victory will be shown).");
+	                    return; // son level tamamland; Victory paneli devreye girecek
+	                }
+	            }
+	
+	            if (_levelCompletedPanel == null)
+	            {
+	                Debug.LogWarning("[GameUI] _levelCompletedPanel is NULL! Inspector'da atanmam.");
+	                return;
+	            }
+	            
+	            // Dier tm level'ler bittikten sonra bu panel alsn
+	            _levelCompletedPanel.SetActive(true);
+	            Debug.Log("[GameUI] LevelCompleted panel set active.");
+	        }
 
         // Button callbacks
         public void OnStartGameClicked() => GameManager.Instance?.StartGame();
