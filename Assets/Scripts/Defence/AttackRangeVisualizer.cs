@@ -1,4 +1,6 @@
 using BoardDefence.Board;
+using BoardDefence.Core.Enums;
+using BoardDefence.Core.Events;
 using UnityEngine;
 
 namespace BoardDefence.Defence
@@ -10,6 +12,9 @@ namespace BoardDefence.Defence
     [RequireComponent(typeof(Transform))]
     public class AttackRangeVisualizer : MonoBehaviour
     {
+	    // Aynı anda SADECE bir savunmacının menzili gözüksün diye
+	    private static AttackRangeVisualizer _currentActive;
+
         [SerializeField] private Color _color = new(0f, 1f, 0f, 0.6f);
         [SerializeField] private float _lineWidth = 0.03f;
         [SerializeField] private int _segments = 40;
@@ -38,6 +43,9 @@ namespace BoardDefence.Defence
             }
 
             UpdateCircle();
+
+	        // Yeni oluşturulan savunmacı: bunu aktif yap, öncekini gizle
+	        SetAsActive();
         }
 
         private void Awake()
@@ -48,6 +56,20 @@ namespace BoardDefence.Defence
                 SetupLineRenderer();
             }
         }
+
+	    private void OnEnable()
+	    {
+	        GameEvents.OnGameStateChanged += HandleGameStateChanged;
+	    }
+
+	    private void OnDisable()
+	    {
+	        GameEvents.OnGameStateChanged -= HandleGameStateChanged;
+	        if (_currentActive == this)
+	        {
+	            _currentActive = null;
+	        }
+	    }
 
         private void SetupLineRenderer()
         {
@@ -68,6 +90,7 @@ namespace BoardDefence.Defence
             _line.material = mat;
             _line.startColor = _color;
             _line.endColor = _color;
+	        _line.enabled = false; // varsayılan olarak GÖRÜNMEZ, Show() ile açılır
         }
 
         private void UpdateCircle()
@@ -86,6 +109,51 @@ namespace BoardDefence.Defence
                 _line.SetPosition(i, new Vector3(x, y, 0f));
             }
         }
+
+	        /// <summary>
+	        /// Bu savunmacıyı "aktif" menzil göstergesi yap.
+	        /// Önce diğer tüm AttackRangeVisualizer'ları gizler, sonra bunu gösterir.
+	        /// </summary>
+	        private void SetAsActive()
+	        {
+	            if (_currentActive != null && _currentActive != this)
+	            {
+	                _currentActive.Hide();
+	            }
+	            _currentActive = this;
+	            Show();
+	        }
+
+	        public void Show()
+	        {
+	            if (_line == null)
+	            {
+	                SetupLineRenderer();
+	                UpdateCircle();
+	            }
+	            _line.enabled = true;
+	        }
+
+	        public void Hide()
+	        {
+	            if (_line != null)
+	            {
+	                _line.enabled = false;
+	            }
+	        }
+
+	        private void HandleGameStateChanged(GameState state)
+	        {
+	            // Savaş başladığında tüm menzil çemberleri kapanmalı
+	            if (state == GameState.Battle)
+	            {
+	                Hide();
+	                if (_currentActive == this)
+	                {
+	                    _currentActive = null;
+	                }
+	            }
+	        }
 
         private void OnValidate()
         {
