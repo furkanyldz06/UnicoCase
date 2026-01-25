@@ -18,9 +18,18 @@ namespace BoardDefence.Defence
         [SerializeField] private Color _color = new(0f, 1f, 0f, 0.6f);
         [SerializeField] private float _lineWidth = 0.03f;
         [SerializeField] private int _segments = 40;
+	        
+	        [Header("Radar Effect")]
+	        [SerializeField] private bool _enableRadar = true;
+	        [SerializeField] private float _radarRotationSpeed = 90f; // derece/sn
+	        [SerializeField] private float _radarWidthMultiplier = 1.2f;
 
         private LineRenderer _line;
         private float _radiusWorld;
+	        
+	        // Radar süpürme çizgisi
+	        private LineRenderer _radarLine;
+	        private float _currentRadarAngle;
 
         /// <summary>
         /// rangeInCells: kaç hücre menzil (grid bazlı).
@@ -43,6 +52,7 @@ namespace BoardDefence.Defence
             }
 
             UpdateCircle();
+	            SetupRadarLine();
 
 	        // Yeni oluşturulan savunmacı: bunu aktif yap, öncekini gizle
 	        SetAsActive();
@@ -55,6 +65,10 @@ namespace BoardDefence.Defence
             {
                 SetupLineRenderer();
             }
+	            if (_radarLine == null)
+	            {
+	                SetupRadarLine();
+	            }
         }
 
 	    private void OnEnable()
@@ -92,6 +106,41 @@ namespace BoardDefence.Defence
             _line.endColor = _color;
 	        _line.enabled = false; // varsayılan olarak GÖRÜNMEZ, Show() ile açılır
         }
+	        
+	        /// <summary>
+	        /// Radar süpürme çizgisini hazırlar (merkezden menzil çemberine uzanan çizgi).
+	        /// Ayrı bir child GameObject üzerinde ikinci bir LineRenderer kullanılır.
+	        /// </summary>
+	        private void SetupRadarLine()
+	        {
+	            if (!_enableRadar)
+	                return;
+
+	            if (_radarLine != null)
+	                return;
+
+	            var radarObj = new GameObject("RadarSweep");
+	            radarObj.transform.SetParent(transform, false);
+
+	            _radarLine = radarObj.AddComponent<LineRenderer>();
+	            _radarLine.useWorldSpace = false;
+	            _radarLine.loop = false;
+	            _radarLine.positionCount = 2;
+	            _radarLine.startWidth = _lineWidth * _radarWidthMultiplier;
+	            _radarLine.endWidth = 0f; // uçta incelsin
+
+	            var mat = new Material(Shader.Find("Sprites/Default"));
+	            _radarLine.material = mat;
+
+	            // Başlangıçta dolu, uçta saydam – radar efekti
+	            var startColor = _color;
+	            var endColor = new Color(_color.r, _color.g, _color.b, 0f);
+	            _radarLine.startColor = startColor;
+	            _radarLine.endColor = endColor;
+
+	            _radarLine.enabled = false;
+	            _currentRadarAngle = 0f;
+	        }
 
         private void UpdateCircle()
         {
@@ -109,6 +158,27 @@ namespace BoardDefence.Defence
                 _line.SetPosition(i, new Vector3(x, y, 0f));
             }
         }
+
+	        /// <summary>
+	        /// Radar çizgisini döndürür (radar taraması efekti).
+	        /// </summary>
+	        private void Update()
+	        {
+	            if (_radarLine == null || !_radarLine.enabled || _radiusWorld <= 0f)
+	                return;
+
+	            _currentRadarAngle += _radarRotationSpeed * Mathf.Deg2Rad * Time.deltaTime;
+	            if (_currentRadarAngle > Mathf.PI * 2f)
+	            {
+	                _currentRadarAngle -= Mathf.PI * 2f;
+	            }
+
+	            float x = Mathf.Cos(_currentRadarAngle) * _radiusWorld;
+	            float y = Mathf.Sin(_currentRadarAngle) * _radiusWorld;
+
+	            _radarLine.SetPosition(0, Vector3.zero);
+	            _radarLine.SetPosition(1, new Vector3(x, y, 0f));
+	        }
 
 	        /// <summary>
 	        /// Bu savunmacıyı "aktif" menzil göstergesi yap.
@@ -132,6 +202,18 @@ namespace BoardDefence.Defence
 	                UpdateCircle();
 	            }
 	            _line.enabled = true;
+	            
+	            if (_enableRadar)
+	            {
+	                if (_radarLine == null)
+	                {
+	                    SetupRadarLine();
+	                }
+	                if (_radarLine != null)
+	                {
+	                    _radarLine.enabled = true;
+	                }
+	            }
 	        }
 
 	        public void Hide()
@@ -139,6 +221,10 @@ namespace BoardDefence.Defence
 	            if (_line != null)
 	            {
 	                _line.enabled = false;
+	            }
+	            if (_radarLine != null)
+	            {
+	                _radarLine.enabled = false;
 	            }
 	        }
 
