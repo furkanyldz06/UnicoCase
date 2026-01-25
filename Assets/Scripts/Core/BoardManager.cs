@@ -30,6 +30,7 @@ namespace BoardDefence.Core
         private DefenceItemType? _selectedItemType;
         private bool _placementEnabled;
 
+
         #region Properties
         
         public bool PlacementEnabled => _placementEnabled;
@@ -41,6 +42,9 @@ namespace BoardDefence.Core
         // Test mode lives system
         private int _testLives = 3;
         private bool _isGameOver = false;
+
+        public BoardDefence.UI.GameUIController _gameUIController;
+
 
         private void Awake()
         {
@@ -70,6 +74,8 @@ namespace BoardDefence.Core
 
             _testLives--;
             Debug.Log($"<color=red>💔 ENEMY REACHED BASE! Lives remaining: {_testLives}</color>");
+            
+            _gameUIController.UpdateUI();
 
             if (_testLives <= 0)
             {

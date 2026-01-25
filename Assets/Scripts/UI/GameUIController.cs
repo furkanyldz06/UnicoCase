@@ -98,7 +98,7 @@ namespace BoardDefence.UI
                 case GameState.Preparation:
                 case GameState.Battle:
                     _gamePanel?.SetActive(true);
-                    _startBattleButton?.gameObject.SetActive(state == GameState.Preparation);
+                    // _startBattleButton?.gameObject.SetActive(state == GameState.Preparation);
                     break;
                 case GameState.Paused:
                     _gamePanel?.SetActive(true);
@@ -125,13 +125,13 @@ namespace BoardDefence.UI
 	            _levelCompletedPanel?.SetActive(false);
         }
 
-        private void UpdateUI()
+        public void UpdateUI()
         {
             var gm = GameManager.Instance;
             if (gm == null) return;
 
             if (_livesText != null)
-                _livesText.text = $"Lives: {gm.CurrentLives}";
+                _livesText.text = $"Base Health: {gm.CurrentLives}";
             
             if (_levelText != null && gm.LevelManager != null)
                 _levelText.text = $"Level: {gm.LevelManager.CurrentLevel}";
