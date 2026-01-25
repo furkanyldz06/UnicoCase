@@ -143,12 +143,12 @@ namespace BoardDefence.UI
             var bm = GameManager.Instance?.BoardManager;
             if (bm == null) return;
 
-            if (_item1CountText != null)
-                _item1CountText.text = bm.GetAvailableCount(DefenceItemType.Type1).ToString();
-            if (_item2CountText != null)
-                _item2CountText.text = bm.GetAvailableCount(DefenceItemType.Type2).ToString();
-            if (_item3CountText != null)
-                _item3CountText.text = bm.GetAvailableCount(DefenceItemType.Type3).ToString();
+	    	    if (_item1CountText != null)
+	    	        _item1CountText.text = $"Remaining: {bm.GetAvailableCount(DefenceItemType.Type1)}";
+	    	    if (_item2CountText != null)
+	    	        _item2CountText.text = $"Remaining: {bm.GetAvailableCount(DefenceItemType.Type2)}";
+	    	    if (_item3CountText != null)
+	    	        _item3CountText.text = $"Remaining: {bm.GetAvailableCount(DefenceItemType.Type3)}";
         }
 
         private void SelectDefenceItem(DefenceItemType type)
