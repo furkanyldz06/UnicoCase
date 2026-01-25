@@ -444,23 +444,27 @@ namespace BoardDefence.Core
                 var attacker = placeholder.AddComponent<SimpleTurret>();
                 attacker.Initialize(type, gridPosition);
 
-                cell.PlaceObject(placeholder);
-                _placedItems[gridPosition] = null;
-                _availableItems[type]--;
-                Debug.Log($"Placed placeholder turret at {gridPosition}");
-                return true;
+	                cell.PlaceObject(placeholder);
+	                _placedItems[gridPosition] = null;
+	                _availableItems[type]--;
+	                // Envanter güncellendikten SONRA event gönder ki UI doğru sayıyı görsün
+	                GameEvents.RaiseDefenceItemPlaced(gridPosition, type);
+	                Debug.Log($"Placed placeholder turret at {gridPosition}");
+	                return true;
             }
 
-            var item = _defenceFactory.CreateAndPlace(type, gridPosition, worldPos, transform);
+	            var item = _defenceFactory.CreateAndPlace(type, gridPosition, worldPos, transform);
 
-            if (item != null)
-            {
-                cell.PlaceObject(item.gameObject);
-                _placedItems[gridPosition] = item;
-                _availableItems[type]--;
-                Debug.Log($"Successfully placed {type} at {gridPosition}");
-                return true;
-            }
+	            if (item != null)
+	            {
+	                cell.PlaceObject(item.gameObject);
+	                _placedItems[gridPosition] = item;
+	                _availableItems[type]--;
+	                // Sayaç güncellemesinden sonra event yolla
+	                GameEvents.RaiseDefenceItemPlaced(gridPosition, type);
+	                Debug.Log($"Successfully placed {type} at {gridPosition}");
+	                return true;
+	            }
 
             Debug.LogError("Failed to create defence item!");
             return false;
@@ -490,11 +494,12 @@ namespace BoardDefence.Core
             var cell = _gameBoard.GetCell(gridPosition);
             cell?.RemoveObject();
             
-            _availableItems[item.ItemType]++;
-            _placedItems.Remove(gridPosition);
-            
-            item.Remove();
-            return true;
+	            _availableItems[item.ItemType]++;
+	            _placedItems.Remove(gridPosition);
+	            item.Remove();
+	            // Kaldırma sonrası event gönder, UI yeniden saysın
+	            GameEvents.RaiseDefenceItemRemoved(gridPosition);
+	            return true;
         }
 
         /// <summary>
