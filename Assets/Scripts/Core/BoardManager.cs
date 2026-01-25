@@ -7,6 +7,7 @@ using BoardDefence.Data;
 using BoardDefence.Defence;
 using BoardDefence.Enemy;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 namespace BoardDefence.Core
 {
@@ -82,10 +83,20 @@ namespace BoardDefence.Core
 
         private void Update()
         {
-            if (UnityEngine.Input.GetMouseButtonDown(0))
-            {
-                HandleClick();
-            }
+	    	    if (UnityEngine.Input.GetMouseButtonDown(0))
+	    	    {
+	    	        // Eğer imleç şu anda bir UI elementinin üzerindeyse
+	    	        // (örneğin defence type butonları), board'a placement yapma.
+	    	        if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
+	    	        {
+	    	            // Tıklama UI için kullanılsın, board'a düşmesin.
+	    	            
+	    	        }
+	    	        else
+	    	        {
+	    	            HandleClick();
+	    	        }
+	    	    }
 
             // Klavye ile item seçimi
             if (UnityEngine.Input.GetKeyDown(KeyCode.Alpha1))
@@ -354,6 +365,10 @@ namespace BoardDefence.Core
         /// </summary>
         private void HandleClick()
         {
+	    	    // Placement devre dışıysa (örneğin battle başladıktan sonra), hiçbir şey yapma
+	    	    if (!_placementEnabled)
+	    	        return;
+
             if (!_selectedItemType.HasValue)
             {
                 Debug.Log("No item type selected! Press 1, 2, or 3 to select.");
