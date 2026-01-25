@@ -356,13 +356,40 @@ namespace BoardDefence.Defence
                     damageable.TakeDamage(_damage);
                     Debug.Log($"Bullet hit! Dealt {_damage} damage");
 
-                    // Visual hit effect
-                    CreateHitEffect();
+	                    // Floating damage number at hit position
+	                    ShowDamageNumber(_damage);
+
+	                    // Visual hit effect
+	                    CreateHitEffect();
                 }
             }
 
             Destroy(gameObject);
         }
+
+	        private void ShowDamageNumber(int amount)
+	        {
+	            // Create world-space text object at hit position
+	            var go = new GameObject("DamageText");
+	            go.transform.position = transform.position;
+	            go.transform.position += new Vector3(Random.Range(-0.1f, 0.1f), 0.15f, 0f);
+
+	            var textMesh = go.AddComponent<TextMesh>();
+	            textMesh.text = amount.ToString();
+	            textMesh.fontSize = 32;
+	            textMesh.characterSize = 0.15f;
+	            textMesh.alignment = TextAlignment.Center;
+	            textMesh.anchor = TextAnchor.MiddleCenter;
+	            textMesh.color = Color.yellow;
+
+	            // Face the main camera so the text is readable
+	            if (Camera.main != null)
+	            {
+	                go.transform.rotation = Camera.main.transform.rotation;
+	            }
+
+	            go.AddComponent<FloatingDamageText>();
+	        }
 
         private void CreateHitEffect()
         {
@@ -376,5 +403,54 @@ namespace BoardDefence.Defence
             Destroy(effect, 0.15f);
         }
     }
+
+	    /// <summary>
+	    /// Simple behaviour for floating damage text (moves up and fades out).
+	    /// </summary>
+	    public class FloatingDamageText : MonoBehaviour
+	    {
+	        private TextMesh _textMesh;
+	        private float _duration = 0.8f;
+	        private float _elapsed;
+	        private Color _startColor;
+	        private float _riseSpeed = 1.2f;
+
+	        private void Awake()
+	        {
+	            _textMesh = GetComponent<TextMesh>();
+	            if (_textMesh != null)
+	            {
+	                _startColor = _textMesh.color;
+	            }
+	        }
+
+	        private void Update()
+	        {
+	            _elapsed += Time.deltaTime;
+
+	            // Move slightly upward over time
+	            transform.position += Vector3.up * (_riseSpeed * Time.deltaTime);
+
+	            // Keep facing the camera if possible
+	            if (Camera.main != null)
+	            {
+	                transform.rotation = Camera.main.transform.rotation;
+	            }
+
+	            // Fade out alpha over lifetime
+	            if (_textMesh != null)
+	            {
+	                float t = Mathf.Clamp01(_elapsed / _duration);
+	                var c = _startColor;
+	                c.a = 1f - t;
+	                _textMesh.color = c;
+	            }
+
+	            if (_elapsed >= _duration)
+	            {
+	                Destroy(gameObject);
+	            }
+	        }
+	    }
 }
 

@@ -99,11 +99,18 @@ namespace BoardDefence.Core
         /// </summary>
         public void StartGame()
         {
-            _currentLives = _playerLives;
-            _levelManager.LoadLevel(1);
-            SetState(GameState.Preparation);
-            
-            GameEvents.RaiseGameStarted();
+	        if (_levelManager == null)
+	            return;
+	        
+	        if (_levelManager.CurrentLevelData == null)
+	        {
+	            _levelManager.LoadLevel(1);
+	        }
+	        
+	        _currentLives = _playerLives;
+	        SetState(GameState.Preparation);
+	        
+	        GameEvents.RaiseGameStarted();
         }
 
         /// <summary>
@@ -166,28 +173,25 @@ namespace BoardDefence.Core
 
         private void HandleAllEnemiesDefeated()
         {
-	    	    // Sadece aktif savaş halindeyken anlamlı
-	    	    if (_currentState != GameState.Battle)
-	    	        return;
-	    	
-	    	    int finishedLevel = _levelManager != null ? _levelManager.CurrentLevel : -1;
-	    	
-	    	    // Tüm düşmanlar ölmüş ve halen canımız varsa: level BAŞARILI
-	    	    // Sonraki level varsa otomatik geç; yoksa klasik Victory ekranı.
-	    	    if (_levelManager != null && _levelManager.LoadNextLevel())
-	    	    {
-	    	        Debug.Log($"[GameManager] Level {finishedLevel} SUCCESS. Loading next level: {_levelManager.CurrentLevel}");
-	    	        // Yeni level için tahtayı temizle, canları resetle ve tekrar hazırlığa geç
-	    	        _boardManager.ClearAllDefenceItems();
-	    	        _currentLives = _playerLives;
-	    	        SetState(GameState.Preparation);
-	    	    }
-	    	    else
-	    	    {
-	    	        // Son leveli de bitirdik: artık level yok, tam Victory
-	    	        Debug.Log($"[GameManager] Last level {finishedLevel} SUCCESS. Game Victory.");
-	    	        Victory();
-	    	    }
+	        if (_currentState != GameState.Battle)
+	            return;
+	        
+	        if (_levelManager == null)
+	            return;
+	        
+	        if (_levelManager.HasNextLevel)
+	        {
+	            if (_boardManager != null)
+	                _boardManager.ClearAllDefenceItems();
+	            
+	            _currentLives = _playerLives;
+	            _levelManager.LoadNextLevel();
+	            SetState(GameState.MainMenu);
+	        }
+	        else
+	        {
+	            Victory();
+	        }
         }
 
         private void Victory()
