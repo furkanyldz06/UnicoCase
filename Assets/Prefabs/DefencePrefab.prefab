@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 3231742191115396904}
   - component: {fileID: 3784068697744460737}
   - component: {fileID: 7000534684474860575}
+  - component: {fileID: 6690885902330859938}
   m_Layer: 0
   m_Name: DefencePrefab
   m_TagString: Untagged
@@ -101,3 +102,21 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _spriteRenderer: {fileID: 3784068697744460737}
+--- !u!114 &6690885902330859938
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9121523336701313486}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 20a71467d9f48425987e1876e0737e3e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _color: {r: 0, g: 1, b: 0, a: 0.6}
+  _lineWidth: 0.05
+  _segments: 40
+  _enableRadar: 1
+  _radarRotationSpeed: 90
+  _radarWidthMultiplier: 5
