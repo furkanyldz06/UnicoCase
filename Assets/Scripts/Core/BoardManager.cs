@@ -104,11 +104,20 @@ namespace BoardDefence.Core
                 Debug.Log("Selected: Type3");
             }
 
-            // SPACE tuşu ile savaşı başlat
-            if (UnityEngine.Input.GetKeyDown(KeyCode.Space))
-            {
-                StartBattle();
-            }
+	    	    // SPACE tuşu ile savaşı başlat
+	    	    if (UnityEngine.Input.GetKeyDown(KeyCode.Space))
+	    	    {
+	    	        // Yeni mimaride savaş başlatma GameManager üzerinden yapılıyor.
+	    	        // Eğer GameManager yoksa, eski test modu için BoardManager.StartBattle()'a düş.
+	    	        if (GameManager.Instance != null)
+	    	        {
+	    	            GameManager.Instance.StartBattle();
+	    	        }
+	    	        else
+	    	        {
+	    	            StartBattle();
+	    	        }
+	    	    }
 
             // R tuşu ile restart
             if (UnityEngine.Input.GetKeyDown(KeyCode.R))
