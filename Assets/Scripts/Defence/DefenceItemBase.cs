@@ -40,24 +40,27 @@ namespace BoardDefence.Defence
         #endregion
 
 
-        public void Initialize(DefenceItemData data)
+       public void Initialize(DefenceItemData data)
         {
             _data = data;
             _attackStrategy = AttackStrategyFactory.GetStrategy(data.AttackDirection);
-            
+
             if (_spriteRenderer != null && data.Sprite != null)
             {
                 _spriteRenderer.sprite = data.Sprite;
                 _spriteRenderer.color = data.TintColor;
             }
 
-	            var rangeViz = GetComponent<AttackRangeVisualizer>();
-	            if (rangeViz == null)
-	            {
-	                rangeViz = gameObject.AddComponent<AttackRangeVisualizer>();
-	            }
-	            int rangeCells = _data != null ? _data.Range : 1;
-	            rangeViz.Initialize(rangeCells);
+            var rangeViz = GetComponent<AttackRangeVisualizer>();
+            if (rangeViz == null)
+            {
+                rangeViz = gameObject.AddComponent<AttackRangeVisualizer>();
+            }
+
+            rangeViz.ForwardOnly = data.AttackDirection == AttackDirection.Forward;
+
+            int rangeCells = _data != null ? _data.Range : 1;
+            rangeViz.Initialize(rangeCells);
         }
 
         public void Place(Vector2Int position)
@@ -79,7 +82,6 @@ namespace BoardDefence.Defence
 
         public bool CanBePlacedAt(Vector2Int position)
         {
-            // Defence items can only be placed in the bottom half (rows 4-7)
             return position.y >= 4 && position.y < 8 && position.x >= 0 && position.x < 4;
         }
 
@@ -133,7 +135,6 @@ namespace BoardDefence.Defence
         {
 				Vector3 worldPos = GetWorldPosition(targetPos);
 				
-				// Search for enemies near this board cell first
 				Collider[] colliders = Physics.OverlapSphere(worldPos, 0.5f);
 				foreach (var col in colliders)
 				{
@@ -312,8 +313,6 @@ namespace BoardDefence.Defence
                 if (damageable != null && !damageable.IsDead)
                 {
                     damageable.TakeDamage(_damage);
-                    Debug.Log($"Bullet hit! Dealt {_damage} damage");
-
 	                    ShowDamageNumber(_damage);
 
 	                    CreateHitEffect();
@@ -378,16 +377,13 @@ namespace BoardDefence.Defence
 	        {
 	            _elapsed += Time.deltaTime;
 
-	            // Move slightly upward over time
 	            transform.position += Vector3.up * (_riseSpeed * Time.deltaTime);
 
-	            // Keep facing the camera if possible
 	            if (Camera.main != null)
 	            {
 	                transform.rotation = Camera.main.transform.rotation;
 	            }
 
-	            // Fade out alpha over lifetime
 	            if (_textMesh != null)
 	            {
 	                float t = Mathf.Clamp01(_elapsed / _duration);

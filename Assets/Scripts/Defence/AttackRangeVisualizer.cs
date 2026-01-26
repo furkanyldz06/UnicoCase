@@ -15,10 +15,19 @@ namespace BoardDefence.Defence
         [SerializeField] private float _lineWidth = 0.03f;
         [SerializeField] private int _segments = 40;
 	        
-	        [Header("Radar Effect")]
-	        [SerializeField] private bool _enableRadar = true;
-	        [SerializeField] private float _radarRotationSpeed = 90f; // derece/sn
-	        [SerializeField] private float _radarWidthMultiplier = 1.2f;
+	    [Header("Radar Effect")]
+	    [SerializeField] private bool _enableRadar = true;
+	    [SerializeField] private float _radarRotationSpeed = 90f; // derece/sn
+	    [SerializeField] private float _radarWidthMultiplier = 1.2f;
+
+		[Header("Shape")]
+		[SerializeField] private bool _forwardOnly = false;
+		public bool ForwardOnly
+		{
+			get => _forwardOnly;
+			set => _forwardOnly = value;
+		}
+		[SerializeField] private float _boxWidth = 1f; // world unit
 
         private LineRenderer _line;
         private float _radiusWorld;
@@ -28,26 +37,30 @@ namespace BoardDefence.Defence
 
 
         public void Initialize(float rangeInCells)
-        {
-            float cellSize = 1f;
-            var board = FindObjectOfType<GameBoard>();
-            if (board != null)
-            {
-                cellSize = board.TotalCellSize;
-            }
+		{
+			float cellSize = 1f;
+			var board = FindObjectOfType<GameBoard>();
+			if (board != null)
+			{
+				cellSize = board.TotalCellSize;
+			}
 
-            _radiusWorld = Mathf.Max(0.01f, rangeInCells * cellSize);
+			_radiusWorld = Mathf.Max(0.01f, rangeInCells * cellSize);
 
-            if (_line == null)
-            {
-                SetupLineRenderer();
-            }
+			if (_line == null)
+			{
+				SetupLineRenderer();
+			}
 
-            UpdateCircle();
-	            SetupRadarLine();
+			if (_forwardOnly)
+				UpdateForwardBox();
+			else
+				UpdateCircle();
 
-	        SetAsActive();
-        }
+			SetupRadarLine();
+			SetAsActive();
+		}
+		
 
         private void Awake()
         {
@@ -83,7 +96,7 @@ namespace BoardDefence.Defence
                 _line = gameObject.AddComponent<LineRenderer>();
             }
 
-            _line.useWorldSpace = false; // Merkez bu obje, noktalari lokal çizeriz
+            _line.useWorldSpace = false;
             _line.loop = true;
             _line.positionCount = Mathf.Max(3, _segments);
             _line.startWidth = _lineWidth;
@@ -93,14 +106,14 @@ namespace BoardDefence.Defence
             _line.material = mat;
             _line.startColor = _color;
             _line.endColor = _color;
-	        _line.enabled = false; // varsayılan olarak GÖRÜNMEZ, Show() ile açılır
+	        _line.enabled = false;
         }
 	        
 
 	        private void SetupRadarLine()
 	        {
-	            if (!_enableRadar)
-	                return;
+				 if (!_enableRadar || _forwardOnly)
+        		return;
 
 	            if (_radarLine != null)
 	                return;
@@ -143,6 +156,24 @@ namespace BoardDefence.Defence
                 _line.SetPosition(i, new Vector3(x, y, 0f));
             }
         }
+
+		private void UpdateForwardBox()
+		{
+			if (_line == null)
+				return;
+
+			_line.loop = true;
+			_line.positionCount = 4;
+
+			float halfWidth = _boxWidth * 0.5f;
+			float length = _radiusWorld;
+
+			// Local space – ileri yön +Y
+			_line.SetPosition(0, new Vector3(-halfWidth, 0f, 0f));
+			_line.SetPosition(1, new Vector3( halfWidth, 0f, 0f));
+			_line.SetPosition(2, new Vector3( halfWidth, length, 0f));
+			_line.SetPosition(3, new Vector3(-halfWidth, length, 0f));
+		}
 
 
 	        private void Update()
@@ -220,16 +251,21 @@ namespace BoardDefence.Defence
 	            }
 	        }
 
-        private void OnValidate()
-        {
-            if (_line != null)
-            {
-                _line.startWidth = _lineWidth;
-                _line.endWidth = _lineWidth;
-                _line.startColor = _color;
-                _line.endColor = _color;
-            }
-        }
+       private void OnValidate()
+		{
+			if (_line != null)
+			{
+				_line.startWidth = _lineWidth;
+				_line.endWidth = _lineWidth;
+				_line.startColor = _color;
+				_line.endColor = _color;
+
+				if (_forwardOnly)
+					UpdateForwardBox();
+				else
+					UpdateCircle();
+			}
+		}
     }
 }
 

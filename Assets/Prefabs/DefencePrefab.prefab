@@ -120,3 +120,5 @@ MonoBehaviour:
   _enableRadar: 1
   _radarRotationSpeed: 90
   _radarWidthMultiplier: 5
+  _forwardOnly: 1
+  _boxWidth: 1

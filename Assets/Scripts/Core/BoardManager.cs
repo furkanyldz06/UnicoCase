@@ -87,7 +87,7 @@ namespace BoardDefence.Core
 	
 	    	        if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
 	    	        {
-	    	            // Tıklama UI için kullanılsın, board'a düşmesin.
+	    	            // Click for uii
 	    	        }
 	    	        else
 	    	        {
@@ -136,14 +136,12 @@ namespace BoardDefence.Core
             _placementEnabled = true;
             _enemyCounter = 0;
 
-            // Destroy all enemies
             var enemies = GameObject.FindGameObjectsWithTag("Enemy");
             foreach (var enemy in enemies)
             {
                 Destroy(enemy);
             }
 
-            // Also find by name as fallback
             var allObjects = FindObjectsByType<Transform>(FindObjectsSortMode.None);
             foreach (var obj in allObjects)
             {
@@ -174,13 +172,11 @@ namespace BoardDefence.Core
                 Destroy(turret.gameObject);
             }
 
-            // Reset available items
             _availableItems.Clear();
             _availableItems[DefenceItemType.Type1] = 10;
             _availableItems[DefenceItemType.Type2] = 10;
             _availableItems[DefenceItemType.Type3] = 10;
 
-            // Reset cell colors
             if (_gameBoard != null)
             {
                 for (int x = 0; x < 4; x++)
