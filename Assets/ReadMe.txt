@@ -1,0 +1,1 @@
+ScriptableObjects klasörü içinde oluşturduğunuz levelları Main scene içindeki LevelManager'e ekleyerek level generate edilebilir
