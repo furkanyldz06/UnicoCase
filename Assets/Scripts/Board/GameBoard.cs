@@ -4,16 +4,13 @@ using UnityEngine;
 
 namespace BoardDefence.Board
 {
-    /// <summary>
-    /// Manages the game board grid (4x8 as per specification)
-    /// Defence items can only be placed in the bottom half (rows 4-7)
-    /// </summary>
+
     public class GameBoard : MonoBehaviour
     {
         [Header("Board Configuration")]
         [SerializeField] private int _width = 4;
         [SerializeField] private int _height = 8;
-        [SerializeField] private int _placeableRowStart = 4; // Bottom half starts at row 4
+        [SerializeField] private int _placeableRowStart = 4;
         
         [Header("Cell Settings")]
         [SerializeField] private GameObject _cellPrefab;
@@ -21,8 +18,8 @@ namespace BoardDefence.Board
         [SerializeField] private float _cellSpacing = 0.1f;
         
         [Header("Visual Settings")]
-        [SerializeField] private Color _topZoneColor = new(0.4f, 0.6f, 0.8f, 1f);    // Light blue
-        [SerializeField] private Color _bottomZoneColor = new(0.6f, 0.7f, 0.9f, 1f); // Slightly different blue
+        [SerializeField] private Color _topZoneColor = new(0.4f, 0.6f, 0.8f, 1f);
+        [SerializeField] private Color _bottomZoneColor = new(0.6f, 0.7f, 0.9f, 1f);
 
         private BoardCell[,] _cells;
         private Dictionary<Vector2Int, BoardCell> _cellLookup;
@@ -43,19 +40,12 @@ namespace BoardDefence.Board
             _cells = new BoardCell[_width, _height];
             _cellLookup = new Dictionary<Vector2Int, BoardCell>();
         }
-
-        /// <summary>
-        /// Initialize the board and create all cells
-        /// </summary>
         public void Initialize()
         {
             ClearBoard();
             CreateBoard();
         }
 
-        /// <summary>
-        /// Create the board grid
-        /// </summary>
         private void CreateBoard()
         {
             for (int y = 0; y < _height; y++)
@@ -67,9 +57,6 @@ namespace BoardDefence.Board
             }
         }
 
-        /// <summary>
-        /// Create a single cell at the specified grid position
-        /// </summary>
         private void CreateCell(int x, int y)
         {
             var position = GridToWorldPosition(new Vector2Int(x, y));
@@ -82,7 +69,6 @@ namespace BoardDefence.Board
                 cell = cellObj.AddComponent<BoardCell>();
             }
             
-            // Bottom half (rows >= _placeableRowStart) is placeable zone
             bool isPlaceableZone = y >= _placeableRowStart;
             cell.Initialize(new Vector2Int(x, y), isPlaceableZone);
             
@@ -90,9 +76,7 @@ namespace BoardDefence.Board
             _cellLookup[new Vector2Int(x, y)] = cell;
         }
 
-        /// <summary>
-        /// Convert grid position to world position
-        /// </summary>
+
         public Vector3 GridToWorldPosition(Vector2Int gridPos)
         {
             float totalSize = TotalCellSize;
@@ -101,14 +85,11 @@ namespace BoardDefence.Board
             
             return new Vector3(
                 gridPos.x * totalSize + xOffset,
-                -gridPos.y * totalSize - yOffset, // Flip Y so row 0 is at top
+                -gridPos.y * totalSize - yOffset,
                 0
             );
         }
 
-        /// <summary>
-        /// Convert world position to grid position
-        /// </summary>
         public Vector2Int WorldToGridPosition(Vector3 worldPos)
         {
             float totalSize = TotalCellSize;
@@ -124,39 +105,28 @@ namespace BoardDefence.Board
             );
         }
 
-        /// <summary>
-        /// Get cell at grid position
-        /// </summary>
         public BoardCell GetCell(Vector2Int position)
         {
             return _cellLookup.TryGetValue(position, out var cell) ? cell : null;
         }
 
-        /// <summary>
-        /// Get cell at grid position
-        /// </summary>
+
         public BoardCell GetCell(int x, int y) => GetCell(new Vector2Int(x, y));
 
-        /// <summary>
-        /// Check if position is valid on the board
-        /// </summary>
+
         public bool IsValidPosition(Vector2Int position)
         {
             return position.x >= 0 && position.x < _width &&
                    position.y >= 0 && position.y < _height;
         }
 
-        /// <summary>
-        /// Check if position is in the placeable zone
-        /// </summary>
+
         public bool IsPlaceablePosition(Vector2Int position)
         {
             return IsValidPosition(position) && position.y >= _placeableRowStart;
         }
 
-        /// <summary>
-        /// Clear all cells and occupants
-        /// </summary>
+
         public void ClearBoard()
         {
             foreach (Transform child in transform)

@@ -5,10 +5,7 @@ using UnityEngine;
 
 namespace BoardDefence.Enemy
 {
-    /// <summary>
-    /// Object Pool Pattern implementation for enemies
-    /// Improves performance by reusing enemy instances
-    /// </summary>
+
     public class EnemyPool : MonoBehaviour
     {
         [Header("Pool Settings")]
@@ -79,7 +76,6 @@ namespace BoardDefence.Enemy
                 _poolContainer = containerObj.transform;
             }
 
-            // Pre-populate pools
             foreach (EnemyType type in System.Enum.GetValues(typeof(EnemyType)))
             {
                 _pools[type] = new Queue<EnemyBase>();
@@ -100,9 +96,7 @@ namespace BoardDefence.Enemy
             }
         }
 
-        /// <summary>
-        /// Get an enemy from the pool
-        /// </summary>
+
         public EnemyBase Get(EnemyType type)
         {
             EnemyBase enemy;
@@ -126,7 +120,6 @@ namespace BoardDefence.Enemy
                 enemy.OnSpawn();
                 _activeEnemies[type].Add(enemy);
                 
-                // Setup callbacks
                 enemy.OnDefeated = (e) => Return(e);
                 enemy.OnReachedBase = (e) => Return(e);
             }
@@ -134,9 +127,7 @@ namespace BoardDefence.Enemy
             return enemy;
         }
 
-        /// <summary>
-        /// Return an enemy to the pool
-        /// </summary>
+
         public void Return(EnemyBase enemy)
         {
             if (enemy == null) return;
@@ -146,9 +137,7 @@ namespace BoardDefence.Enemy
             _pools[enemy.EnemyType].Enqueue(enemy);
         }
 
-        /// <summary>
-        /// Return all active enemies to the pool
-        /// </summary>
+
         public void ReturnAll()
         {
             foreach (var type in _activeEnemies.Keys)
@@ -161,9 +150,7 @@ namespace BoardDefence.Enemy
             }
         }
 
-        /// <summary>
-        /// Get all currently active enemies
-        /// </summary>
+
         public List<EnemyBase> GetActiveEnemies()
         {
             var allActive = new List<EnemyBase>();

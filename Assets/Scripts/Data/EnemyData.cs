@@ -3,10 +3,7 @@ using UnityEngine;
 
 namespace BoardDefence.Data
 {
-    /// <summary>
-    /// ScriptableObject for Enemy configuration
-    /// Data-Driven Design for easy balancing and modification
-    /// </summary>
+
     [CreateAssetMenu(fileName = "EnemyData", menuName = "BoardDefence/Enemy Data")]
     public class EnemyData : ScriptableObject
     {
@@ -45,9 +42,7 @@ namespace BoardDefence.Data
         
         #endregion
 
-        /// <summary>
-        /// Validate data in editor
-        /// </summary>
+
         private void OnValidate()
         {
             if (_maxHealth < 1) _maxHealth = 1;

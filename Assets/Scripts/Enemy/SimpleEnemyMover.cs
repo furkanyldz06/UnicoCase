@@ -5,10 +5,7 @@ using UnityEngine;
 
 namespace BoardDefence.Enemy
 {
-    /// <summary>
-    /// Basit düşman hareket komponenti - test için
-    /// Yukarıdan aşağı hareket eder
-    /// </summary>
+
     public class SimpleEnemyMover : MonoBehaviour, IDamageable
     {
         [SerializeField] private float _moveSpeed = 1f; // blok/saniye
@@ -21,7 +18,6 @@ namespace BoardDefence.Enemy
 	        private bool _isMoving = true;
 	        private bool _isDead = false;
 
-	        // Grid konumu (kolon/satır) - savunmalar için okunabilir yapsın
 	        public Vector2Int CurrentGridPos => _currentGridPos;
 
 	        #region IDamageable
@@ -37,10 +33,8 @@ namespace BoardDefence.Enemy
             _currentHealth = _maxHealth;
             _targetWorldPos = transform.position;
 
-            // Tag ekle (savunmalar bulsun diye)
             gameObject.tag = "Enemy";
 
-            // Collider ekle (hasar alabilmesi için)
             if (GetComponent<SphereCollider>() == null)
             {
                 var collider = gameObject.AddComponent<SphereCollider>();
@@ -48,7 +42,6 @@ namespace BoardDefence.Enemy
                 collider.isTrigger = true;
             }
 
-            // Bir sonraki hedefi belirle
             SetNextTarget();
         }
 
@@ -56,16 +49,13 @@ namespace BoardDefence.Enemy
         {
             if (_isDead || !_isMoving) return;
 
-            // Hedefe doğru hareket et
             float step = _moveSpeed * Time.deltaTime;
             transform.position = Vector3.MoveTowards(transform.position, _targetWorldPos, step);
 
-            // Hedefe ulaştık mı?
             if (Vector3.Distance(transform.position, _targetWorldPos) < 0.01f)
             {
                 _currentGridPos = new Vector2Int(_currentGridPos.x, _currentGridPos.y + 1);
                 
-                // Boardun sonuna ulaştık mı?
                 if (_currentGridPos.y >= 8)
                 {
                     ReachedBase();
@@ -86,7 +76,6 @@ namespace BoardDefence.Enemy
             }
             else
             {
-                // Fallback - basit aşağı hareket
                 _targetWorldPos = transform.position + Vector3.down;
             }
         }
@@ -107,7 +96,6 @@ namespace BoardDefence.Enemy
             _currentHealth -= damage;
             Debug.Log($"Enemy took {damage} damage! Health: {_currentHealth}/{_maxHealth}");
             
-            // Görsel feedback
             StartCoroutine(DamageFlash());
             
             if (_currentHealth <= 0)
@@ -123,7 +111,6 @@ namespace BoardDefence.Enemy
             Debug.Log("Enemy died!");
             GameEvents.RaiseEnemyDied(_currentGridPos);
             
-            // Ölüm efekti
             GetComponent<Renderer>().material.color = Color.black;
             Destroy(gameObject, 0.3f);
         }
@@ -141,10 +128,9 @@ namespace BoardDefence.Enemy
                 renderer.material.color = originalColor;
         }
 
-        // Defence item'ın raycast ile bulabilmesi için
         private void OnTriggerEnter2D(Collider2D other)
         {
-            // Hasar alma için collider tespiti
+           
         }
     }
 }

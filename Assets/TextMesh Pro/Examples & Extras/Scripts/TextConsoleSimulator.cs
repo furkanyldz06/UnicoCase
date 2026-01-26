@@ -41,10 +41,6 @@ namespace TMPro.Examples
         }
 
 
-        /// <summary>
-        /// Method revealing the text one character at a time.
-        /// </summary>
-        /// <returns></returns>
         IEnumerator RevealCharacters(TMP_Text textComponent)
         {
             textComponent.ForceMeshUpdate();
@@ -76,11 +72,6 @@ namespace TMPro.Examples
             }
         }
 
-
-        /// <summary>
-        /// Method revealing the text one word at a time.
-        /// </summary>
-        /// <returns></returns>
         IEnumerator RevealWords(TMP_Text textComponent)
         {
             textComponent.ForceMeshUpdate();

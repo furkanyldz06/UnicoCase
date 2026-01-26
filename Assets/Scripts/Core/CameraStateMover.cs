@@ -5,10 +5,7 @@ using UnityEngine;
 
 namespace BoardDefence.Core
 {
-    /// <summary>
-    /// Game state'e göre ana kameranın X pozisyonunu yumuşak geçişle değiştirir.
-    /// MainMenu'de X=0.5, Battle'da X=0 olacak şekilde 1 saniyelik lerp yapar.
-    /// </summary>
+
     public class CameraStateMover : MonoBehaviour
     {
         [Header("References")]
@@ -43,7 +40,6 @@ namespace BoardDefence.Core
 
         private void HandleGameStateChanged(GameState state)
         {
-            // Sadece MainMenu ve Battle için kamera kaydır
             switch (state)
             {
                 case GameState.MainMenu:
@@ -53,7 +49,6 @@ namespace BoardDefence.Core
                     StartMove(_battleX);
                     break;
                 default:
-                    // Diğer state'lerde kamera sabit kalsın
                     break;
             }
         }

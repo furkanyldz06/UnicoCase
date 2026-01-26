@@ -5,9 +5,7 @@ using UnityEngine;
 
 namespace BoardDefence.Data
 {
-    /// <summary>
-    /// Data structure for spawn configuration
-    /// </summary>
+
     [Serializable]
     public class SpawnData
     {
@@ -16,9 +14,7 @@ namespace BoardDefence.Data
         [Min(0f)] public float SpawnDelay = 1f; // Delay between each spawn
     }
 
-    /// <summary>
-    /// Data structure for available defence items in a level
-    /// </summary>
+
     [Serializable]
     public class DefenceItemAllocation
     {
@@ -26,10 +22,7 @@ namespace BoardDefence.Data
         [Min(1)] public int Count = 1;
     }
 
-    /// <summary>
-    /// ScriptableObject for Level configuration
-    /// Allows easy level design and modification as per requirements
-    /// </summary>
+
     [CreateAssetMenu(fileName = "LevelData", menuName = "BoardDefence/Level Data")]
     public class LevelData : ScriptableObject
     {
@@ -62,9 +55,7 @@ namespace BoardDefence.Data
         
         #endregion
 
-        /// <summary>
-        /// Get total enemy count for this level
-        /// </summary>
+
         public int GetTotalEnemyCount()
         {
             int total = 0;
@@ -75,9 +66,7 @@ namespace BoardDefence.Data
             return total;
         }
 
-        /// <summary>
-        /// Get count of specific defence item type available
-        /// </summary>
+
         public int GetDefenceItemCount(DefenceItemType type)
         {
             foreach (var allocation in _availableDefenceItems)
@@ -88,9 +77,7 @@ namespace BoardDefence.Data
             return 0;
         }
 
-        /// <summary>
-        /// Get count of specific enemy type to spawn
-        /// </summary>
+
         public int GetEnemyCount(EnemyType type)
         {
             int count = 0;

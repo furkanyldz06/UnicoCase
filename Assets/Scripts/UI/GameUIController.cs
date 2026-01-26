@@ -7,10 +7,7 @@ using UnityEngine.UI;
 
 namespace BoardDefence.UI
 {
-    /// <summary>
-    /// Main UI controller for the game
-    /// Listens to game events and updates UI accordingly
-    /// </summary>
+
     public class GameUIController : MonoBehaviour
     {
         [Header("Panels")]
@@ -167,32 +164,25 @@ namespace BoardDefence.UI
 	        
 	        private void HandleLevelCompleted(int level)
 	        {
-	            Debug.Log($"[GameUI] HandleLevelCompleted called for level {level}");
 	            
 	            var gm = GameManager.Instance;
 	            var levelManager = gm?.LevelManager;
-	
-	            // Eger bu olay son level iin geldiyse, ayrca "Level Completed"
-	            // paneli gstermeyelim; zaten GameState.Victory ile Victory paneli alacak.
+
 	            if (levelManager != null)
 	            {
 	                int totalLevels = levelManager.TotalLevels;
-	                Debug.Log($"[GameUI] TotalLevels={totalLevels}");
 	                
 	                if (totalLevels > 0 && level >= totalLevels)
 	                {
-	                    Debug.Log("[GameUI] Last level completed, skipping LevelCompleted panel (Victory will be shown).");
-	                    return; // son level tamamland; Victory paneli devreye girecek
+	                    return;
 	                }
 	            }
 	
 	            if (_levelCompletedPanel == null)
 	            {
-	                Debug.LogWarning("[GameUI] _levelCompletedPanel is NULL! Inspector'da atanmam.");
 	                return;
 	            }
 	            
-	            // Dier tm level'ler bittikten sonra bu panel alsn
 	            _levelCompletedPanel.SetActive(true);
 	            Debug.Log("[GameUI] LevelCompleted panel set active.");
 	        }

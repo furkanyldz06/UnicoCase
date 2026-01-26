@@ -7,10 +7,7 @@ using UnityEngine;
 
 namespace BoardDefence.Enemy
 {
-    /// <summary>
-    /// Base class for all enemies
-    /// Implements IDamageable and IPoolable for damage system and object pooling
-    /// </summary>
+
     [RequireComponent(typeof(Collider2D))]
     public class EnemyBase : MonoBehaviour, IDamageable, IPoolable
     {
@@ -23,7 +20,6 @@ namespace BoardDefence.Enemy
         private Vector2Int _currentGridPosition;
         private Coroutine _moveCoroutine;
 
-        // Callback for when enemy is defeated or reaches base
         public System.Action<EnemyBase> OnDefeated;
         public System.Action<EnemyBase> OnReachedBase;
 
@@ -50,9 +46,7 @@ namespace BoardDefence.Enemy
         
         #endregion
 
-        /// <summary>
-        /// Initialize the enemy with its data
-        /// </summary>
+
         public void Initialize(EnemyData data)
         {
             _data = data;
@@ -75,7 +69,6 @@ namespace BoardDefence.Enemy
             
             GameEvents.RaiseEnemyDamaged(_currentGridPosition, damage);
             
-            // Visual feedback
             StartCoroutine(DamageFlash());
             
             if (IsDead)
@@ -124,9 +117,7 @@ namespace BoardDefence.Enemy
         
         #endregion
 
-        /// <summary>
-        /// Start moving the enemy towards the base
-        /// </summary>
+
         public void StartMoving(Vector2Int startPosition, System.Func<Vector2Int, Vector3> gridToWorld)
         {
             _currentGridPosition = startPosition;
@@ -138,9 +129,7 @@ namespace BoardDefence.Enemy
             GameEvents.RaiseEnemySpawned(startPosition, EnemyType);
         }
 
-        /// <summary>
-        /// Stop the enemy's movement
-        /// </summary>
+
         public void StopMoving()
         {
             _isMoving = false;
@@ -151,27 +140,21 @@ namespace BoardDefence.Enemy
             }
         }
 
-        /// <summary>
-        /// Movement coroutine - moves from top to bottom
-        /// </summary>
         private IEnumerator MoveRoutine(System.Func<Vector2Int, Vector3> gridToWorld)
         {
             while (_isMoving && !IsDead)
             {
-                // Move to next row (down = positive Y in grid)
                 var nextPosition = new Vector2Int(_currentGridPosition.x, _currentGridPosition.y + 1);
                 
-                // Check if reached base (bottom of board)
-                if (nextPosition.y >= 8) // Board height
+                if (nextPosition.y >= 8)
                 {
                     ReachedBase();
                     yield break;
                 }
 
-                // Calculate movement
                 var startPos = transform.position;
                 var endPos = gridToWorld(nextPosition);
-                float moveTime = 1f / MoveSpeed; // Time to move one block
+                float moveTime = 1f / MoveSpeed;
                 float elapsed = 0f;
 
                 while (elapsed < moveTime && _isMoving && !IsDead)
@@ -189,10 +172,6 @@ namespace BoardDefence.Enemy
                 }
             }
         }
-
-        /// <summary>
-        /// Called when enemy reaches the player's base
-        /// </summary>
         private void ReachedBase()
         {
             StopMoving();
@@ -202,9 +181,6 @@ namespace BoardDefence.Enemy
             OnReachedBase?.Invoke(this);
         }
 
-        /// <summary>
-        /// Visual feedback when taking damage
-        /// </summary>
         private IEnumerator DamageFlash()
         {
             if (_spriteRenderer == null) yield break;

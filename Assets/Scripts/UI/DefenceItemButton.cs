@@ -7,9 +7,7 @@ using UnityEngine.UI;
 
 namespace BoardDefence.UI
 {
-    /// <summary>
-    /// UI component for defence item selection buttons
-    /// </summary>
+
     public class DefenceItemButton : MonoBehaviour
     {
         [Header("Configuration")]
@@ -50,9 +48,6 @@ namespace BoardDefence.UI
             _button?.onClick.RemoveListener(OnClick);
         }
 
-        /// <summary>
-        /// Initialize the button with item data
-        /// </summary>
         public void Initialize()
         {
             if (_itemData != null)
@@ -71,9 +66,7 @@ namespace BoardDefence.UI
             UpdateDisplay();
         }
 
-        /// <summary>
-        /// Update the button display
-        /// </summary>
+
         public void UpdateDisplay()
         {
             var boardManager = GameManager.Instance?.BoardManager;
@@ -120,9 +113,6 @@ namespace BoardDefence.UI
             }
         }
 
-        /// <summary>
-        /// Set the selection state of this button
-        /// </summary>
         public void SetSelected(bool selected)
         {
             _isSelected = selected;
@@ -136,7 +126,6 @@ namespace BoardDefence.UI
 
             boardManager.SelectItemType(_itemType);
             
-            // Notify other buttons to deselect
             var allButtons = FindObjectsOfType<DefenceItemButton>();
             foreach (var button in allButtons)
             {

@@ -5,10 +5,7 @@ using UnityEngine;
 
 namespace BoardDefence.Defence
 {
-    /// <summary>
-    /// Factory Pattern implementation for creating Defence Items
-    /// Provides centralized creation and configuration
-    /// </summary>
+
     public class DefenceItemFactory : MonoBehaviour
     {
         [Header("Defence Item Data")]
@@ -36,9 +33,7 @@ namespace BoardDefence.Defence
             };
         }
 
-        /// <summary>
-        /// Create a defence item of the specified type
-        /// </summary>
+
         public DefenceItemBase Create(DefenceItemType type, Vector3 position, Transform parent = null)
         {
             var data = GetData(type);
@@ -67,9 +62,7 @@ namespace BoardDefence.Defence
             return defenceItem;
         }
 
-        /// <summary>
-        /// Create a defence item and place it on the board
-        /// </summary>
+
         public DefenceItemBase CreateAndPlace(DefenceItemType type, Vector2Int gridPosition, 
             Vector3 worldPosition, Transform parent = null)
         {
@@ -81,9 +74,7 @@ namespace BoardDefence.Defence
             return item;
         }
 
-        /// <summary>
-        /// Get data for a specific defence item type
-        /// </summary>
+
         public DefenceItemData GetData(DefenceItemType type)
         {
             if (_dataLookup == null)
@@ -94,9 +85,7 @@ namespace BoardDefence.Defence
             return _dataLookup.TryGetValue(type, out var data) ? data : null;
         }
 
-        /// <summary>
-        /// Register or update data for a defence item type
-        /// </summary>
+
         public void RegisterData(DefenceItemType type, DefenceItemData data)
         {
             if (_dataLookup == null)

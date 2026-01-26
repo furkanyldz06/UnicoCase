@@ -4,10 +4,7 @@ using UnityEngine;
 
 namespace BoardDefence.Core.Events
 {
-    /// <summary>
-    /// Static event hub implementing Observer Pattern
-    /// Provides loose coupling between game systems
-    /// </summary>
+
     public static class GameEvents
     {
         // Game State Events
@@ -74,9 +71,6 @@ namespace BoardDefence.Core.Events
 
         #endregion
 
-        /// <summary>
-        /// Clear all event subscriptions - call when changing scenes
-        /// </summary>
         public static void ClearAllEvents()
         {
             OnGameStateChanged = null;

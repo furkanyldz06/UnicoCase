@@ -8,11 +8,7 @@ using UnityEngine;
 
 namespace BoardDefence.Core
 {
-    /// <summary>
-    /// Main game manager implementing State Pattern for game flow
-    /// Acts as the central coordinator between systems
-    /// Uses Dependency Injection pattern via serialized fields
-    /// </summary>
+
     public class GameManager : MonoBehaviour
     {
         public static GameManager Instance { get; private set; }
@@ -83,9 +79,7 @@ namespace BoardDefence.Core
             GameEvents.OnAllEnemiesDefeated -= HandleAllEnemiesDefeated;
         }
 
-        /// <summary>
-        /// Initialize all game systems
-        /// </summary>
+
         public void Initialize()
         {
             _currentLives = _playerLives;
@@ -94,9 +88,7 @@ namespace BoardDefence.Core
             SetState(GameState.MainMenu);
         }
 
-        /// <summary>
-        /// Start the game with the first level
-        /// </summary>
+
         public void StartGame()
         {
 	        if (_levelManager == null)
@@ -113,9 +105,7 @@ namespace BoardDefence.Core
 	        GameEvents.RaiseGameStarted();
         }
 
-        /// <summary>
-        /// Start the battle phase
-        /// </summary>
+
         public void StartBattle()
         {
             if (_currentState != GameState.Preparation) return;
@@ -125,9 +115,6 @@ namespace BoardDefence.Core
             _boardManager.StartAllDefenceItems();
         }
 
-        /// <summary>
-        /// Pause the game
-        /// </summary>
         public void PauseGame()
         {
             if (_currentState == GameState.Battle || _currentState == GameState.Preparation)
@@ -138,9 +125,7 @@ namespace BoardDefence.Core
             }
         }
 
-        /// <summary>
-        /// Resume the game
-        /// </summary>
+
         public void ResumeGame()
         {
             if (_currentState != GameState.Paused) return;
@@ -150,9 +135,6 @@ namespace BoardDefence.Core
             GameEvents.RaiseGameResumed();
         }
 
-        /// <summary>
-        /// Set the game state
-        /// </summary>
         private void SetState(GameState newState)
         {
             if (_currentState == newState) return;
@@ -209,9 +191,6 @@ namespace BoardDefence.Core
             GameEvents.RaiseGameOver();
         }
 
-        /// <summary>
-        /// Restart the current level
-        /// </summary>
         public void RestartLevel()
         {
             _enemyPool.ReturnAll();

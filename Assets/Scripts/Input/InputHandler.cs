@@ -4,10 +4,7 @@ using UnityEngine;
 
 namespace BoardDefence.Input
 {
-    /// <summary>
-    /// Handles player input for the game
-    /// Decouples input from game logic
-    /// </summary>
+
     public class InputHandler : MonoBehaviour
     {
         [Header("References")]
@@ -70,9 +67,7 @@ namespace BoardDefence.Input
             }
         }
 
-        /// <summary>
-        /// Get current mouse position in world space
-        /// </summary>
+ 
         public Vector3 GetMouseWorldPosition()
         {
             if (_mainCamera == null) return Vector3.zero;
@@ -82,17 +77,13 @@ namespace BoardDefence.Input
             return _mainCamera.ScreenToWorldPoint(mousePos);
         }
 
-        /// <summary>
-        /// Check if left mouse button was clicked this frame
-        /// </summary>
+
         public bool WasLeftClickPressed()
         {
             return UnityEngine.Input.GetMouseButtonDown(0);
         }
 
-        /// <summary>
-        /// Check if right mouse button was clicked this frame
-        /// </summary>
+
         public bool WasRightClickPressed()
         {
             return UnityEngine.Input.GetMouseButtonDown(1);

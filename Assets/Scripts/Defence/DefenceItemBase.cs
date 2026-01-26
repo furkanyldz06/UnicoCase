@@ -10,11 +10,7 @@ using UnityEngine;
 
 namespace BoardDefence.Defence
 {
-    /// <summary>
-    /// Base class for all defence items
-    /// Uses Strategy Pattern for attack behavior
-    /// Implements IPlaceable for board placement
-    /// </summary>
+
     public class DefenceItemBase : MonoBehaviour, IPlaceable
     {
         [SerializeField] private SpriteRenderer _spriteRenderer;
@@ -43,9 +39,7 @@ namespace BoardDefence.Defence
         
         #endregion
 
-        /// <summary>
-        /// Initialize the defence item with its data
-        /// </summary>
+
         public void Initialize(DefenceItemData data)
         {
             _data = data;
@@ -57,7 +51,6 @@ namespace BoardDefence.Defence
                 _spriteRenderer.color = data.TintColor;
             }
 
-	            // Oyun iinde menzil g3sterimi (her savunma iin)
 	            var rangeViz = GetComponent<AttackRangeVisualizer>();
 	            if (rangeViz == null)
 	            {
@@ -90,9 +83,7 @@ namespace BoardDefence.Defence
             return position.y >= 4 && position.y < 8 && position.x >= 0 && position.x < 4;
         }
 
-        /// <summary>
-        /// Start the attack loop
-        /// </summary>
+
         public void StartAttacking()
         {
             if (_isAttacking) return;
@@ -101,9 +92,7 @@ namespace BoardDefence.Defence
             _attackCoroutine = StartCoroutine(AttackLoop());
         }
 
-        /// <summary>
-        /// Stop the attack loop
-        /// </summary>
+
         public void StopAttacking()
         {
             _isAttacking = false;
@@ -114,9 +103,6 @@ namespace BoardDefence.Defence
             }
         }
 
-        /// <summary>
-        /// Main attack loop coroutine
-        /// </summary>
         private IEnumerator AttackLoop()
         {
             while (_isAttacking)
@@ -126,28 +112,23 @@ namespace BoardDefence.Defence
             }
         }
 
-        /// <summary>
-        /// Perform an attack using the current strategy
-        /// </summary>
+
         protected virtual void PerformAttack()
         {
             var targetPositions = _attackStrategy.GetTargetPositions(_gridPosition, Range);
 
-            // Find enemies in range and shoot at them
             foreach (var pos in targetPositions)
             {
                 var enemy = FindEnemyInDirection(pos);
                 if (enemy != null)
                 {
                     ShootProjectileAt(enemy);
-                    break; // Only shoot one projectile per attack
+                    break;
                 }
             }
         }
 
-        /// <summary>
-        /// Find enemy in the given direction
-        /// </summary>
+
         protected virtual GameObject FindEnemyInDirection(Vector2Int targetPos)
         {
 				Vector3 worldPos = GetWorldPosition(targetPos);
@@ -180,11 +161,9 @@ namespace BoardDefence.Defence
 					}
 				}
 				
-				// Fallback: search all enemies but STILL respect direction (target cell)
 				var enemies = GameObject.FindGameObjectsWithTag("Enemy");
 				if (enemies.Length == 0)
 				{
-					// Fallback: find by name
 					enemies = FindEnemiesByName();
 				}
 				
@@ -207,16 +186,10 @@ namespace BoardDefence.Defence
 				return closest;
         }
 
-	        /// <summary>
-	        /// Forward (sadece ileri) savunmalar için: hedefin gerçekten aynı kolonda
-	        /// olup olmadığını kontrol eder. Diğer yönlerde ateş edenler için kısıtlama yok.
-	        /// </summary>
 	        private bool IsValidColumnForThisDefence(GameObject enemy)
 	        {
-	            // Sadece Forward atak yönü olan item'lar için kolon kilidi uygula
 	            if (_data != null && _data.AttackDirection == AttackDirection.Forward)
 	            {
-	                // Önce grid tabanlı kontrol (SimpleEnemyMover varsa)
 	                var mover = enemy.GetComponent<SimpleEnemyMover>();
 	                if (mover != null)
 	                {
@@ -225,7 +198,6 @@ namespace BoardDefence.Defence
 	                }
 	                else
 	                {
-	                    // Yedek olarak world X'e bak
 	                    float dx = Mathf.Abs(enemy.transform.position.x - transform.position.x);
 	                    if (dx > 0.05f)
 	                        return false;
@@ -251,27 +223,21 @@ namespace BoardDefence.Defence
             return enemies.ToArray();
         }
 
-        /// <summary>
-        /// Shoot a visual projectile at the target
-        /// </summary>
+
         protected virtual void ShootProjectileAt(GameObject target)
         {
             if (target == null) return;
 
-            // Create visual projectile
             var projectile = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             projectile.name = "Bullet";
             projectile.transform.position = transform.position;
             projectile.transform.localScale = Vector3.one * 0.2f;
 
-            // Set color based on defence type
             var renderer = projectile.GetComponent<Renderer>();
             renderer.material.color = GetProjectileColor();
 
-            // Remove default collider and add trigger
             Destroy(projectile.GetComponent<Collider>());
 
-            // Add bullet mover component
             var mover = projectile.AddComponent<BulletMover>();
             mover.Initialize(target, Damage, 8f);
 
@@ -291,19 +257,14 @@ namespace BoardDefence.Defence
             };
         }
 
-        /// <summary>
-        /// Get world position from grid position (simplified - should use board reference)
-        /// </summary>
+
         protected Vector3 GetWorldPosition(Vector2Int gridPos)
         {
-            // Simple conversion - actual implementation should reference GameBoard
             return new Vector3(gridPos.x - 1.5f, -(gridPos.y - 3.5f), 0);
         }
     }
 
-    /// <summary>
-    /// Simple bullet mover component
-    /// </summary>
+
     public class BulletMover : MonoBehaviour
     {
         private GameObject _target;
@@ -329,17 +290,14 @@ namespace BoardDefence.Defence
                 return;
             }
 
-            // Update target position if target still exists
             if (_target != null)
             {
                 _lastTargetPos = _target.transform.position;
             }
 
-            // Move towards target
             Vector3 direction = (_lastTargetPos - transform.position).normalized;
             transform.position += direction * _speed * Time.deltaTime;
 
-            // Check if reached target
             if (Vector3.Distance(transform.position, _lastTargetPos) < 0.2f)
             {
                 HitTarget();
@@ -356,10 +314,8 @@ namespace BoardDefence.Defence
                     damageable.TakeDamage(_damage);
                     Debug.Log($"Bullet hit! Dealt {_damage} damage");
 
-	                    // Floating damage number at hit position
 	                    ShowDamageNumber(_damage);
 
-	                    // Visual hit effect
 	                    CreateHitEffect();
                 }
             }
@@ -369,7 +325,6 @@ namespace BoardDefence.Defence
 
 	        private void ShowDamageNumber(int amount)
 	        {
-	            // Create world-space text object at hit position
 	            var go = new GameObject("DamageText");
 	            go.transform.position = transform.position;
 	            go.transform.position += new Vector3(Random.Range(-0.1f, 0.1f), 0.15f, 0f);
@@ -382,7 +337,6 @@ namespace BoardDefence.Defence
 	            textMesh.anchor = TextAnchor.MiddleCenter;
 	            textMesh.color = Color.yellow;
 
-	            // Face the main camera so the text is readable
 	            if (Camera.main != null)
 	            {
 	                go.transform.rotation = Camera.main.transform.rotation;
@@ -393,7 +347,6 @@ namespace BoardDefence.Defence
 
         private void CreateHitEffect()
         {
-            // Simple hit effect - flash
             var effect = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             effect.name = "HitEffect";
             effect.transform.position = transform.position;
@@ -404,9 +357,6 @@ namespace BoardDefence.Defence
         }
     }
 
-	    /// <summary>
-	    /// Simple behaviour for floating damage text (moves up and fades out).
-	    /// </summary>
 	    public class FloatingDamageText : MonoBehaviour
 	    {
 	        private TextMesh _textMesh;

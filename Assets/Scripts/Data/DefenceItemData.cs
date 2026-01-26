@@ -3,10 +3,7 @@ using UnityEngine;
 
 namespace BoardDefence.Data
 {
-    /// <summary>
-    /// ScriptableObject for Defence Item configuration
-    /// Data-Driven Design for easy balancing and modification
-    /// </summary>
+
     [CreateAssetMenu(fileName = "DefenceItemData", menuName = "BoardDefence/Defence Item Data")]
     public class DefenceItemData : ScriptableObject
     {
@@ -41,9 +38,6 @@ namespace BoardDefence.Data
         
         #endregion
 
-        /// <summary>
-        /// Validate data in editor
-        /// </summary>
         private void OnValidate()
         {
             if (_damage < 1) _damage = 1;

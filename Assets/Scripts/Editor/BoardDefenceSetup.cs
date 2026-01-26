@@ -6,9 +6,7 @@ using UnityEngine;
 
 namespace BoardDefence.Editor
 {
-    /// <summary>
-    /// Editor utility for quick setup of Board Defence game
-    /// </summary>
+
     public static class BoardDefenceSetup
     {
         private const string SO_PATH = "Assets/ScriptableObjects";

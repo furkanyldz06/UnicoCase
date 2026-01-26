@@ -3,10 +3,7 @@ using UnityEngine;
 
 namespace BoardDefence.Utils
 {
-    /// <summary>
-    /// Projectile component for visual attack effects
-    /// Optional visual enhancement for defence item attacks
-    /// </summary>
+
     [RequireComponent(typeof(Rigidbody2D))]
     public class Projectile : MonoBehaviour
     {
@@ -27,9 +24,7 @@ namespace BoardDefence.Utils
             _rigidbody.gravityScale = 0f;
         }
 
-        /// <summary>
-        /// Initialize and fire the projectile
-        /// </summary>
+
         public void Fire(Vector2 direction, int damage)
         {
             _direction = direction.normalized;

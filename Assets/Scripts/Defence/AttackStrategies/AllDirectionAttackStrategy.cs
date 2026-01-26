@@ -4,10 +4,6 @@ using UnityEngine;
 
 namespace BoardDefence.Defence.AttackStrategies
 {
-    /// <summary>
-    /// Strategy for all-direction attacks (up, down, left, right)
-    /// Implements Strategy Pattern for attack behavior
-    /// </summary>
     public class AllDirectionAttackStrategy : IAttackStrategy
     {
         private static readonly List<Vector2Int> AllDirections = new()

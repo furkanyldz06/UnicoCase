@@ -5,14 +5,10 @@ using UnityEngine;
 
 namespace BoardDefence.Defence
 {
-    /// <summary>
-    /// Çalışma zamanında (Game view'de) savunma menzilini çember olarak gösterir.
-    /// SimpleTurret ve DefenceItemBase bu komponenti Initialize sırasında kurar.
-    /// </summary>
+
     [RequireComponent(typeof(Transform))]
     public class AttackRangeVisualizer : MonoBehaviour
     {
-	    // Aynı anda SADECE bir savunmacının menzili gözüksün diye
 	    private static AttackRangeVisualizer _currentActive;
 
         [SerializeField] private Color _color = new(0f, 1f, 0f, 0.6f);
@@ -27,14 +23,10 @@ namespace BoardDefence.Defence
         private LineRenderer _line;
         private float _radiusWorld;
 	        
-	        // Radar süpürme çizgisi
 	        private LineRenderer _radarLine;
 	        private float _currentRadarAngle;
 
-        /// <summary>
-        /// rangeInCells: kaç hücre menzil (grid bazlı).
-        /// GameBoard.TotalCellSize ile dünya birimine çevrilir.
-        /// </summary>
+
         public void Initialize(float rangeInCells)
         {
             float cellSize = 1f;
@@ -54,13 +46,11 @@ namespace BoardDefence.Defence
             UpdateCircle();
 	            SetupRadarLine();
 
-	        // Yeni oluşturulan savunmacı: bunu aktif yap, öncekini gizle
 	        SetAsActive();
         }
 
         private void Awake()
         {
-            // Editor'de sahneye elle eklenirse de düzgün dursun diye
             if (_line == null)
             {
                 SetupLineRenderer();
@@ -99,7 +89,6 @@ namespace BoardDefence.Defence
             _line.startWidth = _lineWidth;
             _line.endWidth = _lineWidth;
 
-            // Basit, her projede bulunan default sprite shader
             var mat = new Material(Shader.Find("Sprites/Default"));
             _line.material = mat;
             _line.startColor = _color;
@@ -107,10 +96,7 @@ namespace BoardDefence.Defence
 	        _line.enabled = false; // varsayılan olarak GÖRÜNMEZ, Show() ile açılır
         }
 	        
-	        /// <summary>
-	        /// Radar süpürme çizgisini hazırlar (merkezden menzil çemberine uzanan çizgi).
-	        /// Ayrı bir child GameObject üzerinde ikinci bir LineRenderer kullanılır.
-	        /// </summary>
+
 	        private void SetupRadarLine()
 	        {
 	            if (!_enableRadar)
@@ -132,7 +118,6 @@ namespace BoardDefence.Defence
 	            var mat = new Material(Shader.Find("Sprites/Default"));
 	            _radarLine.material = mat;
 
-	            // Başlangıçta dolu, uçta saydam – radar efekti
 	            var startColor = _color;
 	            var endColor = new Color(_color.r, _color.g, _color.b, 0f);
 	            _radarLine.startColor = startColor;
@@ -159,9 +144,7 @@ namespace BoardDefence.Defence
             }
         }
 
-	        /// <summary>
-	        /// Radar çizgisini döndürür (radar taraması efekti).
-	        /// </summary>
+
 	        private void Update()
 	        {
 	            if (_radarLine == null || !_radarLine.enabled || _radiusWorld <= 0f)
@@ -180,10 +163,7 @@ namespace BoardDefence.Defence
 	            _radarLine.SetPosition(1, new Vector3(x, y, 0f));
 	        }
 
-	        /// <summary>
-	        /// Bu savunmacıyı "aktif" menzil göstergesi yap.
-	        /// Önce diğer tüm AttackRangeVisualizer'ları gizler, sonra bunu gösterir.
-	        /// </summary>
+
 	        private void SetAsActive()
 	        {
 	            if (_currentActive != null && _currentActive != this)
@@ -230,7 +210,6 @@ namespace BoardDefence.Defence
 
 	        private void HandleGameStateChanged(GameState state)
 	        {
-	            // Savaş başladığında tüm menzil çemberleri kapanmalı
 	            if (state == GameState.Battle)
 	            {
 	                Hide();

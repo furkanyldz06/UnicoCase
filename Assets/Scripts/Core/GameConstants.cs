@@ -2,10 +2,7 @@ using UnityEngine;
 
 namespace BoardDefence.Core
 {
-    /// <summary>
-    /// Central location for game constants
-    /// Makes it easy to tune and modify game parameters
-    /// </summary>
+
     public static class GameConstants
     {
         #region Board Configuration

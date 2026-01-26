@@ -36,12 +36,6 @@ namespace TMPro.Examples
             return newCurve;
         }
 
-
-        /// <summary>
-        ///  Method to curve text along a Unity animation curve.
-        /// </summary>
-        /// <param name="textComponent"></param>
-        /// <returns></returns>
         IEnumerator WarpText()
         {
             VertexCurve.preWrapMode = WrapMode.Clamp;

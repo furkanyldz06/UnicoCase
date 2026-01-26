@@ -4,10 +4,7 @@ using UnityEngine.UI;
 
 namespace BoardDefence.Utils
 {
-    /// <summary>
-    /// Simple health bar UI component
-    /// Can be attached to any IDamageable entity
-    /// </summary>
+
     public class HealthBar : MonoBehaviour
     {
         [SerializeField] private Image _fillImage;
@@ -29,7 +26,6 @@ namespace BoardDefence.Utils
 
         private void Start()
         {
-            // Try to find target on parent
             _target = GetComponentInParent<IDamageable>();
             UpdateDisplay();
         }
@@ -42,18 +38,12 @@ namespace BoardDefence.Utils
             }
         }
 
-        /// <summary>
-        /// Set the target to track
-        /// </summary>
         public void SetTarget(IDamageable target)
         {
             _target = target;
             UpdateDisplay();
         }
 
-        /// <summary>
-        /// Update the health bar display
-        /// </summary>
         public void UpdateDisplay()
         {
             if (_target == null || _fillImage == null) return;
@@ -61,7 +51,6 @@ namespace BoardDefence.Utils
             float healthPercent = (float)_target.CurrentHealth / _target.MaxHealth;
             _fillImage.fillAmount = healthPercent;
 
-            // Update color based on health
             if (healthPercent <= _lowHealthThreshold)
             {
                 _fillImage.color = _lowHealthColor;
@@ -75,7 +64,6 @@ namespace BoardDefence.Utils
                 _fillImage.color = _fullHealthColor;
             }
 
-            // Hide when full
             if (_hideWhenFull && _canvas != null)
             {
                 _canvas.enabled = healthPercent < 1f;

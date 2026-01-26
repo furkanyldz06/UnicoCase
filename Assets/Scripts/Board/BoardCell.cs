@@ -2,10 +2,6 @@ using UnityEngine;
 
 namespace BoardDefence.Board
 {
-    /// <summary>
-    /// Represents a single cell on the game board
-    /// Each cell can hold either a defence item or be a path for enemies
-    /// </summary>
     public class BoardCell : MonoBehaviour
     {
         [SerializeField] private SpriteRenderer _spriteRenderer;
@@ -33,9 +29,6 @@ namespace BoardDefence.Board
         
         #endregion
 
-        /// <summary>
-        /// Initialize the cell with its position and zone type
-        /// </summary>
         public void Initialize(Vector2Int position, bool isPlaceableZone)
         {
             _gridPosition = position;
@@ -46,9 +39,6 @@ namespace BoardDefence.Board
             UpdateVisual();
         }
 
-        /// <summary>
-        /// Place an object on this cell
-        /// </summary>
         public bool PlaceObject(GameObject obj)
         {
             if (!CanPlaceDefence)
@@ -60,9 +50,6 @@ namespace BoardDefence.Board
             return true;
         }
 
-        /// <summary>
-        /// Remove the occupant from this cell
-        /// </summary>
         public GameObject RemoveObject()
         {
             var obj = _occupant;
@@ -71,10 +58,6 @@ namespace BoardDefence.Board
             UpdateVisual();
             return obj;
         }
-
-        /// <summary>
-        /// Highlight the cell for placement preview
-        /// </summary>
         public void SetHighlight(bool highlighted)
         {
             if (highlighted)
@@ -86,10 +69,6 @@ namespace BoardDefence.Board
                 UpdateVisual();
             }
         }
-
-        /// <summary>
-        /// Select/deselect this cell
-        /// </summary>
         public void SetSelected(bool selected)
         {
             if (selected)
@@ -115,7 +94,6 @@ namespace BoardDefence.Board
                 _spriteRenderer.color = _normalColor;
             }
 	            
-	            // Savunmac1n koyulamayaca0 b1lgeler i6in opacity d161r
 	            if (!_isPlaceableZone)
 	            {
 	                var c = _spriteRenderer.color;

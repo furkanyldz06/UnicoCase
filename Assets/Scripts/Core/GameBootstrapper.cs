@@ -2,10 +2,7 @@ using UnityEngine;
 
 namespace BoardDefence.Core
 {
-    /// <summary>
-    /// Bootstrap class to initialize the game
-    /// Ensures proper initialization order of all systems
-    /// </summary>
+
     public class GameBootstrapper : MonoBehaviour
     {
         [Header("Core Systems")]

@@ -1,8 +1,6 @@
 namespace BoardDefence.Core.Enums
 {
-    /// <summary>
-    /// Game state enumeration for State Pattern
-    /// </summary>
+
     public enum GameState
     {
         None,
@@ -14,9 +12,6 @@ namespace BoardDefence.Core.Enums
         Defeat
     }
 
-    /// <summary>
-    /// Defence item types matching the specification
-    /// </summary>
     public enum DefenceItemType
     {
         Type1,  // damage: 3, range: 4, interval: 3s, direction: forward
@@ -24,9 +19,7 @@ namespace BoardDefence.Core.Enums
         Type3   // damage: 10, range: 1, interval: 5s, direction: all
     }
 
-    /// <summary>
-    /// Enemy types matching the specification
-    /// </summary>
+
     public enum EnemyType
     {
         Type1,  // health: 3, speed: 1 block/s
@@ -34,9 +27,7 @@ namespace BoardDefence.Core.Enums
         Type3   // health: 5, speed: 0.5 block/s
     }
 
-    /// <summary>
-    /// Attack direction types for Strategy Pattern
-    /// </summary>
+
     public enum AttackDirection
     {
         Forward,    // Only attacks in forward direction (up)

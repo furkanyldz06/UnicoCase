@@ -8,10 +8,7 @@ using UnityEngine;
 
 namespace BoardDefence.Defence
 {
-    /// <summary>
-    /// Simple turret component for placeholder defence items
-    /// Automatically shoots at nearby enemies
-    /// </summary>
+
     public class SimpleTurret : MonoBehaviour
     {
         private DefenceItemType _type;
@@ -29,8 +26,6 @@ namespace BoardDefence.Defence
 	            _type = type;
 	            _gridPosition = gridPos;
 	
-	            // Spec'e göre değerler
-	            // Range = kaç hücre ilerisine ateş edebilir (1 hücre ≈ 1 birim)
 	            switch (type)
 	            {
 	                case DefenceItemType.Type1:
@@ -53,7 +48,6 @@ namespace BoardDefence.Defence
 	                    break;
 	            }
 
-	            // Menzil çemberini oyun içinde göster
 	            var rangeViz = GetComponent<AttackRangeVisualizer>();
 	            if (rangeViz == null)
 	            {
@@ -61,7 +55,6 @@ namespace BoardDefence.Defence
 	            }
 	            rangeViz.Initialize(_range);
 
-	            // Otomatik saldırıya başla
 	            StartAttacking();
 	        }
 
@@ -116,31 +109,24 @@ namespace BoardDefence.Defence
 				        var damageable = enemy.GetComponent<IDamageable>();
 				        if (damageable == null || damageable.IsDead)
 				            continue;
-				
-					// Forward turret'ler için: sadece SimpleEnemyMover kullanan
-					// grid tabanlı düşmanları ve SADECE aynı kolon + yukarıyı düşün.
+
 					var mover = enemy.GetComponent<SimpleEnemyMover>();
 					Vector2Int enemyGrid = mover != null ? mover.CurrentGridPos : new Vector2Int(-1, -1);
 				
-				        // Mesafe hesabı – forward turret'ler için kolonu world X'ten kilitle,
-				        // diğerleri için klasik world mesafesi kullan.
 				        float dist;
 				
 					if (_forwardOnly)
 					{
 					    if (mover == null)
-					        continue; // grid bilgisiz düşmanı tamamen yok say
+					        continue;
 					
-					    // 1) GRID'e göre aynı kolon mu?
-					    //    Aynı kolonda değilse forward turret ASLA ateş etmesin.
+
 					    if (enemyGrid.x != _gridPosition.x)
 					        continue;
 					
-					    // 2) Sadece yukarıda (ileri yönde) olanlar
 					    if (enemyGrid.y >= _gridPosition.y)
 					        continue;
 					
-					    // 3) Menzil: kaç satır yukarıda?
 					    int rowDelta = _gridPosition.y - enemyGrid.y; // 1,2,3,...
 					    if (rowDelta > _range)
 					        continue; // menzil dışında
@@ -149,7 +135,6 @@ namespace BoardDefence.Defence
 					}
 				        else
 				        {
-				            // All-direction turret'ler için klasik world mesafesi ve yarıçap
 				            dist = (enemy.transform.position - transform.position).magnitude;
 				            if (dist > _range + 0.5f)
 				                continue;
@@ -167,7 +152,6 @@ namespace BoardDefence.Defence
 
         private void ShootAt(GameObject target)
         {
-            // Create bullet
             var bullet = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             bullet.name = "Bullet";
             bullet.transform.position = transform.position;
